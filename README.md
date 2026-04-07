@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Assembly Dining
 
-## Getting Started
+길도 모르고 어디에 뭐가 있는지 모르는 (저같은) 여의도 신입을 위한 맛집 가이드
+P.S. 국회 앞 한정입니다.
 
-First, run the development server:
+<br><br>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### ✨ Features
+
+- **음식점 정보 조회** — 공공데이터포털 API 연동으로 영업 등록되어 있는 업체 정보 제공
+- **메뉴 기반 퀵 필터** — #제육볶음 #칼국수 #국밥 등 대표 메뉴로 필터링
+- **네이버지도 표시** — 시각적으로 위치를 바로 알 수 있도록 네이버지도 API 연동
+- **익명 한줄평** - '여기 진짜 쟌맛임. 완전 추천' 같은 후기를 남길 수 있는 닉네임+비밀번호 입력 기능
+
+<br><br>
+
+### 🏃 Getting Started
+
+1. .env 파일을 생성하고, 아래 항목을 입력해야 합니다.
+
+```
+# 공공데이터포털 API Key
+GOVERNMENT_API_KEY = 'YOUR_API_KEY_HERE'
+
+# 네이버지도 API Key
+NAVER_API_KEY = 'YOUR_API_KEY_HERE'
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+<br>
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. 간단한 명령어로 개발 환경을 실행할 수 있습니다.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+npm install
+npm run dev
+```
 
-## Learn More
+<br><br>
 
-To learn more about Next.js, take a look at the following resources:
+### 🔨 Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Framework: `Next.js`
+- Language: `TypeScript`
+- state: `TanStack Query`
+- API: `공공데이터포털 (일반음식점 인허가 정보)`
