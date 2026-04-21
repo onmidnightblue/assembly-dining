@@ -1,29 +1,29 @@
 "use client";
 
-import { RestaurantData } from "@types";
+import { PinIcon } from "@/src/assets/svgs";
+import { RestaurantType } from "@types";
 
 interface MapPinProps {
-  data: RestaurantData;
+  restaurant: RestaurantType;
   currentScale: number;
 }
 
-const MapPin = ({ data, currentScale }: MapPinProps) => {
-  const minScale = Math.max(0.8, 1 / currentScale);
+const MapPin = ({ restaurant, currentScale }: MapPinProps) => {
+  const { map_x, map_y, name } = restaurant || {};
 
   return (
     <div
       className="absolute transition-all duration-300 pointer-events-auto"
       style={{
-        left: `${data.x}%`,
-        top: `${data.y}%`,
-        transform: `translate(-100%, -50%) scale(${minScale})`,
+        left: `${map_x}%`,
+        top: `${map_y}%`,
+        transform: `translate(-50%, -50%)`,
       }}
     >
       <div className="flex flex-col items-center group">
-        <div className="w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-md group-hover:bg-blue-500" />
-        <span className="mt-1 text-[8px] font-bold bg-white/80 px-1 rounded shadow-sm whitespace-nowrap">
-          {data.bplcnm}
-        </span>
+        <div className="hover:scale-120 transition duration-300">
+          <PinIcon />
+        </div>
       </div>
     </div>
   );

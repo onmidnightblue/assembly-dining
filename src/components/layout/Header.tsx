@@ -31,8 +31,8 @@ const Header = () => {
           <div
             className={`transition-all duration-500 ease-in-out bg-white pointer-events-auto p-4 ${
               isOpenPanel
-                ? "h-full opacity-100 translate-y-0"
-                : "h-0 opacity-0 -translate-y-10 invisible sm:visible"
+                ? "w-full opacity-100 translate-x-0"
+                : "w-0 opacity-0 -translate-x-10 invisible sm:visible"
             }
           `}
           >

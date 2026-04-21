@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
+import { ReactQueryProvider } from "../providers";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -26,7 +27,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ReactQueryProvider>{children}</ReactQueryProvider>
+      </body>
     </html>
   );
 }

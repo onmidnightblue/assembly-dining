@@ -30,7 +30,10 @@
       "@types/*": ["./src/types/*"],
       "@lib": ["./src/lib/index"],
       "@lib/*": ["./src/lib/*"],
-      "@auth": ["./src/app/auth.ts"]
+      "@providers": ["./src/providers/index"],
+      "@providers/*": ["./src/providers/*"],
+      "@auth": ["./src/app/auth.ts"],
+      "@admin/*": ["./src/components/admin/*"]
     }
   },
   "include": [

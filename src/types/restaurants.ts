@@ -1,4 +1,19 @@
-export interface RestaurantData {
+export interface RestaurantType {
+  id: string;
+  name: string;
+  category: string;
+  phone: string;
+  road_address: string;
+  land_address: string;
+  status_number: string;
+  status_name: string;
+  x: string;
+  y: string;
+  map_x: string;
+  map_y: string;
+  create_at: string;
+
+  // original
   OPNSFTEAMCODE: string; // 개방자치단체코드
   MGTNO: string; // 관리번호
   APVPERMYMD: string; // 인허가일자
