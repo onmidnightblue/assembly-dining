@@ -1,5 +1,6 @@
-import { RestaurantType } from "@/src/types";
-import { useState } from "react";
+import { RestaurantType } from "@types";
+import { useModal } from "@hooks";
+import ModifyModal from "./ModifyModal";
 
 interface Props {
   restaurant: RestaurantType;
@@ -7,31 +8,33 @@ interface Props {
 
 const RestaurantListItem = ({ restaurant }: Props) => {
   const { name, category, land_address, map_x, map_y } = restaurant || {};
-  const [isOpenModal, setIsOpenModal] = useState(false);
+  const { openModal, ModalPortal } = useModal();
 
   return (
     <>
-      {isOpenModal && (
-        <div className="fixed w-3xl h-8 top-1/2 left-1/2">modal</div>
-      )}
+      <ModifyModal restaurant={restaurant} ModalPortal={ModalPortal} />
       <li
-        className="flex justify-between gap-2 items-end p-2 border-b border-b-gray-200 cursor-pointer hover:bg-gray-200"
-        onClick={() => setIsOpenModal((prev) => !prev)}
+        className="flex flex-col p-2 border-b cursor-pointer border-b-gray-200 hover:bg-gray-200"
+        onClick={openModal}
       >
-        <div>
-          <div className="text-sm text-gray-400 border rounded-sm inline-block px-1 mb-1">
-            {category}
-          </div>
-          <div className="font-bold">{name}</div>
+        <div className="font-bold">{name}</div>
+        <div className="flex flex-wrap text-sm">
+          <div className={COMMON_STYLE}>{category}</div>
           <div>{land_address}</div>
         </div>
-        <div className="text-right">
-          <div>{map_x}</div>
-          <div>{map_y}</div>
-        </div>
+        {map_x && map_y && (
+          <div className="flex flex-wrap text-sm">
+            <div className={COMMON_STYLE}>{map_x}</div>
+            <div>{map_y}</div>
+          </div>
+        )}
       </li>
     </>
   );
 };
+
+// css
+const COMMON_STYLE =
+  "relative mr-3 after:content-[''] after:absolute after:w-0.5 after:h-0.5 after:top-1/2 after:-right-2 after:-translate-y-1/2 after:rounded-full after:bg-gray-400";
 
 export default RestaurantListItem;

@@ -1,6 +1,6 @@
 "use client";
 
-import { PinIcon } from "@/src/assets/svgs";
+import { PinIcon } from "@assets";
 import { RestaurantType } from "@types";
 
 interface MapPinProps {
@@ -21,7 +21,7 @@ const MapPin = ({ restaurant, currentScale }: MapPinProps) => {
       }}
     >
       <div className="flex flex-col items-center group">
-        <div className="hover:scale-120 transition duration-300">
+        <div className="transition duration-300 hover:scale-120">
           <PinIcon />
         </div>
       </div>

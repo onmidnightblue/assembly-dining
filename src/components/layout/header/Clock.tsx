@@ -1,7 +1,7 @@
 "use client";
 
-import { ClockIcon } from "@/src/assets/svgs";
-import { useCurrentTime } from "@/src/hooks/useCurrentTime";
+import { ClockIcon } from "@assets";
+import { useCurrentTime } from "@hooks";
 
 const Clock = () => {
   const { year, month, date, hh, mm, ss } = useCurrentTime();
@@ -13,7 +13,7 @@ const Clock = () => {
       <p className="text-lg animate-slide-up">
         {year}. {month}. {date}
       </p>
-      <p className="text-md text-right">
+      <p className="text-right text-md">
         <span key={`hour-${hh}`} className={timeClassName}>
           {hh}
         </span>
@@ -28,7 +28,7 @@ const Clock = () => {
       </p>
     </div>
   ) : (
-    <div className="h-13 w-30 rounded-lg flex justify-center items-center">
+    <div className="flex items-center justify-center rounded h-13 w-30">
       <ClockIcon />
     </div>
   );

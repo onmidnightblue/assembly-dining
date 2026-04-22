@@ -18,22 +18,18 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@images": ["./src/assets/svgs/index"],
-      "@images/*": ["./src/assets/svgs/*"],
-      "@hooks": ["./src/hooks/index"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@constants": ["./src/constants/index"],
-      "@constants/*": ["./src/constants/*"],
-      "@types": ["./src/types/index"],
-      "@types/*": ["./src/types/*"],
-      "@lib": ["./src/lib/index"],
-      "@lib/*": ["./src/lib/*"],
-      "@providers": ["./src/providers/index"],
-      "@providers/*": ["./src/providers/*"],
-      "@auth": ["./src/app/auth.ts"],
-      "@admin/*": ["./src/components/admin/*"]
+      "@assets": ["src/assets/svgs/index"],
+      "@hooks": ["src/hooks/index"],
+      "@constants": ["src/constants/index"],
+      "@types": ["src/types/index"],
+      "@lib": ["src/lib/index"],
+      "@providers": ["src/providers/index"],
+      "@store": ["src/store/index"],
+      "@auth": ["src/app/auth.ts"],
+      "@admin/*": ["src/components/admin/*"],
+      "@components/common": ["src/components/common/index.ts"]
     }
   },
   "include": [

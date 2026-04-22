@@ -1,11 +1,11 @@
-import Header from "@/src/components/layout/Header";
-import Map from "@/src/components/map/Map";
+import Header from "src/components/layout/Header";
+import Map from "src/components/map/Map";
 
 const page = () => {
   return (
-    <div className="flex flex-col h-dvh w-full overflow-hidden">
+    <div className="flex flex-col w-full overflow-hidden h-dvh">
       <Header />
-      <main className="w-full h-full flex items-center justify-center">
+      <main className="flex items-center justify-center w-full h-full">
         <Map />
       </main>
     </div>

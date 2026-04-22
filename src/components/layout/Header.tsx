@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Clock from "./header/Clock";
 import Search from "./header/Search";
-import { FilterIcon } from "@/src/assets/svgs";
+import { FilterIcon } from "@assets";
+import Filter from "./header/Filter";
 
 const Header = () => {
   const [isOpenPanel, setIsOpenPanel] = useState(false);
@@ -14,33 +15,33 @@ const Header = () => {
 
   return (
     <>
-      <header className="grid sm:grid-cols-[max-content_1fr] p-4 fixed top-0 left-0 w-full z-20 pointer-events-none">
-        <div className="bg-white border p-4 pointer-events-auto transition-all duration-300 w-full sm:w-fit flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <h1 className="font-bold text-4xl font-paperozi">국회밥안</h1>
-            <div
-              className="flex items-center border border-gray-300 p-1 hover:border-black transition duration-300 cursor-pointer"
+      <header className="fixed top-0 left-0 z-20 w-full p-4 pointer-events-none grid sm:grid-cols-[max-content_1fr]">
+        <div className="flex flex-col p-4 transition-all duration-500 bg-white border  border-black pointer-events-auto w-full sm:w-[400px]">
+          <div className="flex items-center justify-between">
+            <h1 className="text-4xl font-bold font-paperozi">국회밥안</h1>
+            <button
               onClick={togglePanelHandler}
+              className={`flex items-center p-2 border border-gray-300 hover:bg-gray-50`}
             >
               <FilterIcon />
-            </div>
+            </button>
           </div>
+
           <Search />
-        </div>
-        <div className="overflow-hidden">
+
           <div
-            className={`transition-all duration-500 ease-in-out bg-white pointer-events-auto p-4 ${
+            className={`grid transition-all duration-500 ease-in-out ${
               isOpenPanel
-                ? "w-full opacity-100 translate-x-0"
-                : "w-0 opacity-0 -translate-x-10 invisible sm:visible"
-            }
-          `}
+                ? "grid-rows-[1fr] opacity-100 mt-2"
+                : "grid-rows-[0fr] opacity-0 mt-0 invisible"
+            }`}
           >
-            <div className="whitespace-nowrap">panel</div>
+            <Filter />
           </div>
         </div>
       </header>
-      <aside className="pointer-events-none p-4 m-4 bg-white z-10 h-fit hidden sm:block fixed right-0 top-0 select-none">
+
+      <aside className="fixed top-0 right-0 z-10 hidden p-4 m-4 rounded select-none bg-white/80 backdrop-blur-sm h-fit sm:block">
         <Clock />
       </aside>
     </>

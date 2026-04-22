@@ -1,7 +1,7 @@
 import axios from "axios";
 import { NextResponse } from "next/server";
 import { supabase } from "@lib";
-import { RestaurantType } from "@/src/types";
+import { RestaurantType } from "@types";
 
 export async function GET() {
   try {
@@ -93,33 +93,9 @@ export async function GET() {
       restaurants,
     });
   } catch (error: unknown) {
-    let errorMessage = "Internal Server Error";
-    let errorCode = "UNKNOWN_CODE";
-    let errorDetails = null;
-
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-
-    if (typeof error === "object" && error !== null && "code" in error) {
-      const sbError = error as {
-        message: string;
-        code: string;
-        details?: string;
-        hint?: string;
-      };
-      errorMessage = sbError.message;
-      errorCode = sbError.code;
-      errorDetails = sbError.details || sbError.hint || null;
-    }
-
+    const message = (error as Error)?.message ?? "Internal Server Error";
     return NextResponse.json(
-      {
-        success: false,
-        error: errorMessage,
-        details: errorDetails || null,
-        code: errorCode || "UNKNOWN_CODE",
-      },
+      { success: false, error: message },
       { status: 500 }
     );
   }

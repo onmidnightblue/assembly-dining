@@ -11,7 +11,7 @@ export interface RestaurantType {
   y: string;
   map_x: string;
   map_y: string;
-  create_at: string;
+  created_at: string;
 
   // original
   OPNSFTEAMCODE: string; // 개방자치단체코드

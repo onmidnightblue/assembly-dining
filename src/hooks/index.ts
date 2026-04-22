@@ -1,3 +1,4 @@
 export * from "./useIsMobile";
 export * from "./useCurrentTime";
-export * from "./useFetchRestaurants";
+export * from "./useRestaurants";
+export * from "./useModal";

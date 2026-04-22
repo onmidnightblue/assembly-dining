@@ -6,15 +6,19 @@ import {
   TransformComponent,
   TransformWrapper,
 } from "react-zoom-pan-pinch";
-import { AssemblyMap } from "@images";
-import MapPin from "./MapPin";
-import { useFetchRestaurants } from "@hooks";
-import { RestaurantType } from "@/src/types";
 import Supercluster from "supercluster";
+import { AssemblyMap } from "@assets";
+import { useRestaurants } from "@hooks";
+import { RestaurantType } from "@types";
+import { useRestaurantStore } from "@store";
+import MapPin from "./MapPin";
 
 const Map = ({}) => {
   const [scale, setScale] = useState(1);
-  const { data: restaurants, isLoading, isError } = useFetchRestaurants();
+  const { isLoading, isError } = useRestaurants();
+  const { filteredRestaurants: restaurants } = useRestaurantStore(
+    (state) => state
+  );
 
   const containerRef = useRef<HTMLDivElement>(null);
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
@@ -46,10 +50,12 @@ const Map = ({}) => {
       properties: { cluster: false, restaurant },
       geometry: {
         type: "Point" as const,
-        coordinates: [restaurant.map_x, restaurant.map_y],
+        coordinates: [
+          parseFloat(restaurant.map_x),
+          parseFloat(restaurant.map_y),
+        ],
       },
     }));
-
     index.load(points);
     return index;
   }, [restaurants]);
@@ -62,8 +68,8 @@ const Map = ({}) => {
 
   if (isLoading) {
     return (
-      <div className="w-full h-full animate-pulse relative flex items-center justify-center overflow-hidden rounded-lg">
-        <div className="w-12 h-12 border-4 border-gray-300 border-t-gray-600 rounded-full animate-spin mb-4"></div>
+      <div className="relative flex items-center justify-center w-full h-full overflow-hidden rounded-full animate-pulse">
+        <div className="w-12 h-12 mb-4 border-4 border-gray-300 rounded-full border-t-gray-600 animate-spin"></div>
       </div>
     );
   }
@@ -77,7 +83,7 @@ const Map = ({}) => {
   }
 
   return (
-    <div className="w-full h-full relative overflow-hidden">
+    <div className="relative w-full h-full overflow-hidden">
       <TransformWrapper
         initialScale={1}
         minScale={0.3}
@@ -93,10 +99,10 @@ const Map = ({}) => {
         onTransform={(ref) => setScale(ref.state.scale)}
         ref={transformComponentRef}
       >
-        <div className="absolute bottom-10 right-10 z-100 flex flex-col gap-2">
+        <div className="absolute flex flex-col gap-2 bottom-10 right-10 z-100">
           <button
             onClick={handleReset}
-            className="w-10 h-10 bg-white rounded-full shadow-lg text-xs"
+            className="w-10 h-10 text-xs bg-white rounded"
           >
             Reset
           </button>
@@ -108,7 +114,7 @@ const Map = ({}) => {
           <div
             ref={containerRef}
             onClick={handleMapClick}
-            className="w-max flex justify-center items-center relative cursor-crosshair"
+            className="relative flex items-center justify-center w-max cursor-crosshair"
           >
             <AssemblyMap className="w-full h-auto" />
             {clusters.map((c) => {
@@ -119,7 +125,7 @@ const Map = ({}) => {
                 return (
                   <div
                     key={`cluster-${c.id}`}
-                    className="absolute bg-blue-500 text-white rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-white"
+                    className="absolute flex items-center justify-center font-bold text-white bg-blue-500 border-2 border-white rounded"
                     style={{
                       left: `${x}%`,
                       top: `${y}%`,

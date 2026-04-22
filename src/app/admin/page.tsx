@@ -1,8 +1,8 @@
 "use client";
 
 import AdminHeader from "@admin/AdminHeader";
-import RestaurantList from "@admin/RestaurantList";
 import Filter from "@admin/Filter";
+import RestaurantList from "@admin/RestaurantList";
 
 const page = ({}) => {
   const getRestaurantToGovHandler = async () => {
