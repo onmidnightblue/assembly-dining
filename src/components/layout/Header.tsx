@@ -26,21 +26,18 @@ const Header = () => {
               <FilterIcon />
             </button>
           </div>
-
           <Search />
-
           <div
             className={`grid transition-all duration-500 ease-in-out ${
               isOpenPanel
-                ? "grid-rows-[1fr] opacity-100 mt-2"
-                : "grid-rows-[0fr] opacity-0 mt-0 invisible"
+                ? "grid-rows-[1fr] opacity-100 mt-4"
+                : "grid-rows-[0fr] opacity-0 mt-0"
             }`}
           >
             <Filter />
           </div>
         </div>
       </header>
-
       <aside className="fixed top-0 right-0 z-10 hidden p-4 m-4 rounded select-none bg-white/80 backdrop-blur-sm h-fit sm:block">
         <Clock />
       </aside>

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
-import { useRestaurants } from "@hooks";
 import { RestaurantType } from "@types";
 import { useRestaurantStore } from "@store";
+import { useRestaurants } from "@hooks";
 import RestaurantListItem from "./RestaurantListItem";
 
 const RestaurantList = ({}) => {
@@ -18,7 +18,6 @@ const RestaurantList = ({}) => {
   // infinite scroll
   useEffect(() => {
     if (isLoading || !hasMore) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -62,27 +61,29 @@ const RestaurantList = ({}) => {
   }
 
   return (
-    <div>
-      <ul className="p-4">
-        {displayItems?.map((restaurant: RestaurantType, index) => {
-          const { id } = restaurant || {};
-          return (
-            <RestaurantListItem
-              key={`admin-restaurant-${id}-${index}`}
-              restaurant={restaurant}
-            />
-          );
-        })}
-      </ul>
-      {hasMore && (
-        <div
-          ref={observerTarget}
-          className="relative flex items-center justify-center w-full py-10 overflow-hidden rounded-full animate-pulse"
-        >
-          <div className="w-12 h-12 mb-4 border-4 border-gray-300 rounded-full border-t-gray-600 animate-spin"></div>
-        </div>
-      )}
-    </div>
+    <>
+      <div>
+        <ul className="p-4">
+          {displayItems?.map((restaurant: RestaurantType, index) => {
+            const { id } = restaurant || {};
+            return (
+              <RestaurantListItem
+                key={`admin-restaurant-${id}-${index}`}
+                restaurant={restaurant}
+              />
+            );
+          })}
+        </ul>
+        {hasMore && (
+          <div
+            ref={observerTarget}
+            className="relative flex items-center justify-center w-full py-10 overflow-hidden rounded-full animate-pulse"
+          >
+            <div className="w-12 h-12 mb-4 border-4 border-gray-300 rounded-full border-t-gray-600 animate-spin"></div>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

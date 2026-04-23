@@ -1,15 +1,14 @@
-import { ReactNode, useEffect, useMemo } from "react";
-import debounce from "lodash.debounce";
 import { RestaurantType } from "@types";
-import { Input } from "@components/common";
+import { Input, Modal } from "@components/common";
 import { useRestaurants } from "@hooks";
 
 interface Props {
   restaurant: RestaurantType;
-  ModalPortal: React.ComponentType<{ title: string; children: ReactNode }>;
+  isOpen: boolean;
+  closeModal: () => void;
 }
 
-const ModifyModal = ({ restaurant, ModalPortal }: Props) => {
+const ModifyModal = ({ restaurant, isOpen, closeModal }: Props) => {
   const {
     id,
     name,
@@ -33,7 +32,7 @@ const ModifyModal = ({ restaurant, ModalPortal }: Props) => {
   ];
 
   return (
-    <ModalPortal title={name}>
+    <Modal title={name} isOpen={isOpen} closeModal={closeModal}>
       <form className="flex flex-col gap-4">
         {INPUT_FIELDS.map((field) => (
           <Input
@@ -51,7 +50,7 @@ const ModifyModal = ({ restaurant, ModalPortal }: Props) => {
         <p>ID: {id}</p>
         <p>CRATED: {created_at}</p>
       </div>
-    </ModalPortal>
+    </Modal>
   );
 };
 

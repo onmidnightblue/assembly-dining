@@ -5,20 +5,21 @@ import { RestaurantType } from "@types";
 
 interface MapPinProps {
   restaurant: RestaurantType;
-  currentScale: number;
+  onClick: () => void;
 }
 
-const MapPin = ({ restaurant, currentScale }: MapPinProps) => {
-  const { map_x, map_y, name } = restaurant || {};
+const MapPin = ({ onClick, restaurant }: MapPinProps) => {
+  const { map_x, map_y } = restaurant || {};
 
   return (
     <div
-      className="absolute transition-all duration-300 pointer-events-auto"
+      className="absolute transition-all duration-300 cursor-pointer"
       style={{
         left: `${map_x}%`,
         top: `${map_y}%`,
         transform: `translate(-50%, -50%)`,
       }}
+      onClick={onClick}
     >
       <div className="flex flex-col items-center group">
         <div className="transition duration-300 hover:scale-120">

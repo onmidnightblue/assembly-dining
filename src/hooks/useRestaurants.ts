@@ -55,7 +55,7 @@ export const useRestaurants = (id?: string) => {
     () =>
       debounce((column: string, value: string) => {
         update.mutate({ column, value });
-      }, 800),
+      }, 200),
     [update]
   );
 
@@ -69,5 +69,7 @@ export const useRestaurants = (id?: string) => {
     isError: isError || update.isError,
     saveToSupabase: debouncedSave,
     updatingField: update.isPending ? update.variables?.column : null,
+    errorField: update.isError ? update.variables?.column : null,
+    errorMessage: update.isError ? update.error.message : null,
   };
 };

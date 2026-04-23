@@ -59,3 +59,12 @@ export interface RestaurantType {
   JTUPSOMAINEDF: string; // 전통업소주된음식
   HOMEPAGE: string; // 홈페이지
 }
+
+export interface ContentItem {
+  key?: string | undefined;
+  data: string | null;
+  label: string;
+  css?: string;
+  width?: number;
+  selectedOptions?: [string, string][];
+}

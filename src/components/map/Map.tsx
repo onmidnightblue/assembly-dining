@@ -7,14 +7,15 @@ import {
   TransformWrapper,
 } from "react-zoom-pan-pinch";
 import Supercluster from "supercluster";
-import { AssemblyMap } from "@assets";
+import { AssemblyMap, PinIcon } from "@assets";
 import { useRestaurants } from "@hooks";
 import { RestaurantType } from "@types";
 import { useRestaurantStore } from "@store";
 import MapPin from "./MapPin";
+import { Toast } from "@components/common";
+import MapDetail from "./MapDetail";
 
 const Map = ({}) => {
-  const [scale, setScale] = useState(1);
   const { isLoading, isError } = useRestaurants();
   const { filteredRestaurants: restaurants } = useRestaurantStore(
     (state) => state
@@ -22,6 +23,10 @@ const Map = ({}) => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
+  const [scale, setScale] = useState(1);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [selectedRestaurant, setSelectedRestaurant] =
+    useState<RestaurantType | null>(null);
 
   const handleReset = () => {
     if (transformComponentRef.current) {
@@ -29,12 +34,22 @@ const Map = ({}) => {
     }
   };
 
-  const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMapClick = async (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!e.ctrlKey) return;
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
-    console.log(`📍x: ${x.toFixed(2)}%, y: ${y.toFixed(2)}%`);
+    const coordText = `x: ${x.toFixed(2)}, y: ${y.toFixed(2)}`;
+    try {
+      await navigator.clipboard.writeText(coordText);
+      setToastMessage(coordText);
+      setTimeout(() => {
+        setToastMessage(null);
+      }, 3000);
+    } catch (err) {
+      console.error("Error", err);
+    }
   };
 
   const clusterData = useMemo(() => {
@@ -45,7 +60,8 @@ const Map = ({}) => {
       maxZoom: 16,
     });
 
-    const points = restaurants.map((restaurant: RestaurantType) => ({
+    const filter = restaurants.filter((restaurant) => restaurant?.map_x);
+    const points = filter.map((restaurant: RestaurantType) => ({
       type: "Feature" as const,
       properties: { cluster: false, restaurant },
       geometry: {
@@ -83,11 +99,11 @@ const Map = ({}) => {
   }
 
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <main className="relative flex items-center justify-center w-full h-full overflow-hidden">
       <TransformWrapper
         initialScale={1}
-        minScale={0.3}
-        maxScale={5}
+        minScale={1}
+        maxScale={3}
         limitToBounds={false}
         smooth={true}
         wheel={{
@@ -114,18 +130,17 @@ const Map = ({}) => {
           <div
             ref={containerRef}
             onClick={handleMapClick}
-            className="relative flex items-center justify-center w-max cursor-crosshair"
+            className={`relative flex items-center justify-center w-max active:cursor-grabbing`}
           >
             <AssemblyMap className="w-full h-auto" />
             {clusters.map((c) => {
               const [x, y] = c.geometry.coordinates;
               const { cluster, point_count } = c.properties;
-
               if (cluster) {
                 return (
                   <div
                     key={`cluster-${c.id}`}
-                    className="absolute flex items-center justify-center font-bold text-white bg-blue-500 border-2 border-white rounded"
+                    className="absolute flex items-center justify-center"
                     style={{
                       left: `${x}%`,
                       top: `${y}%`,
@@ -134,23 +149,34 @@ const Map = ({}) => {
                       height: "30px",
                     }}
                   >
-                    {point_count}
+                    <PinIcon />
+                    <span className="absolute text-sm text-white -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+                      {point_count}
+                    </span>
                   </div>
                 );
               }
-
               return (
                 <MapPin
                   key={c.properties.restaurant.id}
                   restaurant={c.properties.restaurant}
-                  currentScale={scale}
+                  onClick={() => setSelectedRestaurant(c.properties.restaurant)}
                 />
               );
             })}
           </div>
         </TransformComponent>
       </TransformWrapper>
-    </div>
+      {selectedRestaurant && (
+        <MapDetail
+          selectedRestaurant={selectedRestaurant}
+          onClose={() => setSelectedRestaurant(null)}
+        />
+      )}
+      {toastMessage && (
+        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+      )}
+    </main>
   );
 };
 

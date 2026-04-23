@@ -6,9 +6,9 @@ const Filter = ({}) => {
   );
 
   return (
-    <div className="flex p-2 pt-0 mt-2 overflow-hidden">
+    <div className="flex overflow-hidden">
       <div className="flex flex-col gap-2">
-        <p className="text-sm text-gray-600">구분</p>
+        <p className="text-sm text-gray-600">카테고리</p>
         <div className="flex flex-wrap gap-2">
           {categories.map((category) => {
             const isActive = selectedCategories.includes(category);
@@ -16,11 +16,9 @@ const Filter = ({}) => {
               <div
                 key={`panel-${category}`}
                 onClick={() => toggleCategory(category)}
-                className={`px-2 bg-gray-100 rounded transition cursor-pointer
+                className={`px-2 rounded-md transition cursor-pointer
                 ${
-                  isActive
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  isActive ? "bg-black text-white" : "bg-gray-100 text-gray-600"
                 }
                 `}
               >
@@ -30,7 +28,6 @@ const Filter = ({}) => {
           })}
         </div>
       </div>
-
       {/* 룸 유무 */}
       {/* 지금 먹을 수 있는 곳 */}
     </div>

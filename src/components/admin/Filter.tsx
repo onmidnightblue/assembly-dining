@@ -1,5 +1,5 @@
 import { SearchIcon } from "@assets";
-import { SORT_LABELS_KR } from "@constants";
+import { SORT_LABELS } from "@constants";
 import { useRestaurantStore } from "@store";
 
 const Filter = ({}) => {
@@ -23,10 +23,10 @@ const Filter = ({}) => {
         />
       </div>
       <div
-        className="text-center transition duration-300 cursor-pointer hover:text-blue-400"
+        className="text-center transition duration-300 cursor-pointer select-none hover:text-blue-400 "
         onClick={() => setSortOrder()}
       >
-        {SORT_LABELS_KR[sortOrder]}
+        {SORT_LABELS[sortOrder]}
       </div>
     </div>
   );

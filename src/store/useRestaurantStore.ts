@@ -1,13 +1,18 @@
 // src/store/useRestaurantStore.ts
 import { create } from "zustand";
-import { RestaurantType, SortOrder } from "@types";
+import { RestaurantType } from "@types";
+import { SORT_LABELS } from "@constants";
 
-const SORT_CYCLE: SortOrder[] = [
+export type SortOrder = keyof typeof SORT_LABELS;
+export const SORT_CYCLE: SortOrder[] = [
+  "address_asc",
+  "address_desc",
   "name_asc",
   "name_desc",
   "category_asc",
   "category_desc",
-  "latest",
+  "coord_asc",
+  "coord_desc",
 ];
 
 interface RestaurantStore {
@@ -128,28 +133,23 @@ const applyFilters = (
     return categoryMatch && searchMatch;
   });
 
-  return [...result].sort((a, b) => {
-    let comparison = 0;
-    switch (sortOrder) {
-      case "name_asc":
-        comparison = a.name.localeCompare(b.name, "ko");
-        break;
-      case "name_desc":
-        comparison = b.name.localeCompare(a.name, "ko");
-      case "category_asc":
-        comparison = (a.category || "").localeCompare(b.category || "", "ko");
-      case "category_desc":
-        comparison = (b.category || "").localeCompare(a.category || "", "ko");
-      case "latest":
-        comparison =
-          new Date(b.created_at || 0).getTime() -
-          new Date(a.created_at || 0).getTime();
-      default:
-        return 0;
-    }
-    if (comparison === 0) {
-      return a.id.localeCompare(b.id);
-    }
-    return comparison;
+  const sortFunctions: Record<
+    SortOrder,
+    (a: RestaurantType, b: RestaurantType) => number
+  > = {
+    address_asc: (a, b) => a.land_address.localeCompare(b.land_address, "ko"),
+    address_desc: (a, b) => b.land_address.localeCompare(a.land_address, "ko"),
+    name_asc: (a, b) => a.name.localeCompare(b.name, "ko"),
+    name_desc: (a, b) => b.name.localeCompare(a.name, "ko"),
+    category_asc: (a, b) =>
+      (a.category || "").localeCompare(b.category || "", "ko"),
+    category_desc: (a, b) =>
+      (b.category || "").localeCompare(a.category || "", "ko"),
+    coord_asc: (a, b) => (Number(a.x) || 0) - (Number(b.x) || 0),
+    coord_desc: (a, b) => (Number(b.x) || 0) - (Number(a.x) || 0),
+  };
+  return result.sort((a, b) => {
+    const comparison = sortFunctions[sortOrder]?.(a, b) ?? 0;
+    return comparison === 0 ? a.id.localeCompare(b.id) : comparison;
   });
 };
