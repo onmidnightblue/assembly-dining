@@ -168,7 +168,8 @@ const applyFilters = (
       selectedCategories.length === 0 ||
         selectedCategories.includes(restaurant.category || ""),
       !searchTerm ||
-        restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        restaurant.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        restaurant.keyword?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         restaurant.category?.includes(searchTerm),
       coordOrder === "all"
         ? true

@@ -13,6 +13,7 @@ export interface RestaurantType {
   created_at: string;
   is_visible: string;
   has_room: string;
+  keyword: string;
 
   // original
   OPNSFTEAMCODE: string; // 개방자치단체코드
@@ -63,7 +64,7 @@ export interface RestaurantType {
 
 export interface ContentItem {
   key?: string | undefined;
-  data: string | null;
+  data: string | string[] | null;
   label: string;
   css?: string;
   width?: number;

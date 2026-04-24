@@ -12,6 +12,7 @@ const RestaurantListItem = ({ restaurant }: Props) => {
   const {
     id,
     name,
+    keyword,
     category,
     land_address,
     status_number,
@@ -62,13 +63,28 @@ const RestaurantListItem = ({ restaurant }: Props) => {
       },
     ],
     [
-      { data: category, label: "카테고리", key: "category", width: 2 },
-      { data: phone, label: "전화번호", key: "phone", width: 8 },
+      { data: category, label: "치킨", key: "category", width: 2 },
+      { data: phone, label: "02-1234-1234", key: "phone", width: 8 },
     ],
-    [{ data: land_address, label: "주소", key: "land_address", width: 10 }],
     [
-      { data: map_x, label: "x좌표", key: "map_x", width: 5 },
-      { data: map_y, label: "y좌표", key: "map_y", width: 5 },
+      {
+        data: land_address,
+        label: "서울특별시 영등포구 여의도동 1",
+        key: "land_address",
+        width: 10,
+      },
+    ],
+    [
+      {
+        data: keyword,
+        label: "된장찌개, 청국장, 파스타, 복어, 갈치조림",
+        key: "keyword",
+        width: 10,
+      },
+    ],
+    [
+      { data: map_x, label: "22.80", key: "map_x", width: 5 },
+      { data: map_y, label: "25.58", key: "map_y", width: 5 },
     ],
   ];
 
