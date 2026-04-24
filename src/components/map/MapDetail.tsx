@@ -1,4 +1,5 @@
 import ViewComponent from "@admin/restaurantListItem/ViewComponent";
+import { STATUS_LABELS } from "@constants";
 import { ContentItem, RestaurantType } from "@types";
 
 interface Props {
@@ -18,7 +19,7 @@ const MapDetail = ({ selectedRestaurant, onClose }: Props) => {
     [
       {
         label: "상태",
-        data: status_number === "01" ? "영업중" : "폐업",
+        data: STATUS_LABELS[status_number],
         css: status_number === "01" ? "" : "text-error",
       },
       { data: land_address, label: "주소" },

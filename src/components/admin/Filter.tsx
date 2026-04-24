@@ -1,12 +1,34 @@
 import { SearchIcon } from "@assets";
-import { SORT_LABELS } from "@constants";
+import {
+  COORD_LABELS,
+  SORT_LABELS,
+  STATUS_LABELS,
+  VISIBLE_LABELS,
+} from "@constants";
 import { useRestaurantStore } from "@store";
 
 const Filter = ({}) => {
-  const { sortOrder, setSortOrder, setSearchTerm } = useRestaurantStore();
+  const {
+    sortOrder,
+    setSortOrder,
+    setSearchTerm,
+    coordOrder,
+    setCoordOrder,
+    statusOrder,
+    setStatusOrder,
+    visibleOrder,
+    setVisibleOrder,
+  } = useRestaurantStore();
+
+  const toggles = [
+    { label: STATUS_LABELS[statusOrder], action: setStatusOrder },
+    { label: VISIBLE_LABELS[visibleOrder], action: setVisibleOrder },
+    { label: COORD_LABELS[coordOrder], action: setCoordOrder },
+    { label: SORT_LABELS[sortOrder], action: setSortOrder },
+  ];
 
   return (
-    <div className="grid grid-cols-[3fr_100px] items-center gap-4 px-4 pt-4">
+    <div className="grid grid-cols-[1fr_repeat(4,100px)] items-center gap-4 px-4 pt-4">
       <div className="relative">
         <label
           htmlFor="admin-search-input"
@@ -22,12 +44,18 @@ const Filter = ({}) => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      <div
-        className="text-center text-foreground transition duration-300 cursor-pointer select-none hover:text-blue-400 "
-        onClick={() => setSortOrder()}
-      >
-        {SORT_LABELS[sortOrder]}
-      </div>
+      {toggles.map((toggle, index) => {
+        const { label, action } = toggle || {};
+        return (
+          <div
+            key={index}
+            className="text-center transition duration-300 cursor-pointer select-none text-foreground hover:text-blue-400 "
+            onClick={() => action()}
+          >
+            {label}
+          </div>
+        );
+      })}
     </div>
   );
 };

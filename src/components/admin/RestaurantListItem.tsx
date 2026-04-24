@@ -8,7 +8,6 @@ interface Props {
   restaurant: RestaurantType;
 }
 
-console.log(".");
 const RestaurantListItem = ({ restaurant }: Props) => {
   const {
     id,
