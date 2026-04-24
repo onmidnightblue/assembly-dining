@@ -43,7 +43,7 @@ const AdminHeader = () => {
         )}
         <div
           className="text-sm cursor-pointer"
-          onClick={() => signOut({ callbackUrl: "/admin" })}
+          onClick={() => signOut({ callbackUrl: "/assembly-dining/admin" })}
         >
           로그아웃
         </div>
