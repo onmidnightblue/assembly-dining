@@ -47,7 +47,7 @@ export const useRestaurants = (id?: string) => {
     () =>
       debounce((updateData: Record<string, string>) => {
         update.mutate(updateData);
-      }, 200),
+      }, 100),
     [update]
   );
   useEffect(() => {
@@ -84,7 +84,7 @@ export const useRestaurants = (id?: string) => {
     : null;
   return {
     restaurants,
-    isLoading,
+    isLoading: isLoading || update.isPending,
     isError: isError || update.isError,
     saveToSupabase: debouncedSave,
     updatingField: update.isPending ? activeField : null,

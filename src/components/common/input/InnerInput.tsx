@@ -1,12 +1,34 @@
-import { InputHTMLAttributes } from "react";
+import { InputHTMLAttributes, useEffect, useState } from "react";
 
-interface Props extends InputHTMLAttributes<HTMLInputElement> {
+interface Props
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange"> {
   label?: string;
   error?: string | null;
   loading?: boolean;
+  value?: string;
+  onChange: (value: string) => void;
 }
 
-const InnerInput = ({ label, error, loading, className, ...props }: Props) => {
+const InnerInput = ({
+  label,
+  error,
+  loading,
+  value = "",
+  onChange,
+  ...props
+}: Props) => {
+  const [localValue, setLocalValue] = useState(value || "");
+
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  const handleBlur = () => {
+    if (localValue !== value) {
+      onChange(localValue);
+    }
+  };
+
   return (
     <div className="flex flex-col w-full">
       <div className="relative w-full text-sm">
@@ -19,9 +41,14 @@ const InnerInput = ({ label, error, loading, className, ...props }: Props) => {
                 : "border-blue-200 hover:border-blue-300"
             }
             ${loading ? "pr-6 opacity-70" : ""}
-            ${className} 
           `}
+          value={localValue}
           placeholder={label}
+          onChange={(e) => setLocalValue(e.target.value)}
+          onBlur={handleBlur}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+          }}
           {...props}
         />
         {loading && (

@@ -27,7 +27,7 @@ const MapDetail = ({ selectedRestaurant, onClose }: Props) => {
   ];
 
   const handleOpenNaverMap = (name: string) => {
-    const query = encodeURIComponent(`여의도동 ${name}`);
+    const query = encodeURIComponent(`여의도 ${name}`);
     window.open(`https://map.naver.com/v5/search/${query}`, "_blank");
   };
 

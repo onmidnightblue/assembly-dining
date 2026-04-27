@@ -23,7 +23,7 @@ const RestaurantListItem = ({ restaurant }: Props) => {
     has_room,
   } = restaurant || {};
   const [isEditMode, setIsEditMode] = useState(false);
-  const { saveToSupabase, errorField, updatingField, errorMessage } =
+  const { saveToSupabase, errorField, isLoading, errorMessage } =
     useRestaurants(id);
 
   const contents: ContentItem[][] = [
@@ -89,7 +89,7 @@ const RestaurantListItem = ({ restaurant }: Props) => {
   ];
 
   const handleOpenNaverMap = (name: string) => {
-    const query = encodeURIComponent(`여의도동 ${name}`);
+    const query = encodeURIComponent(`여의도 ${name}`);
     window.open(`https://map.naver.com/v5/search/${query}`, "_blank");
   };
 
@@ -108,7 +108,6 @@ const RestaurantListItem = ({ restaurant }: Props) => {
         {isEditMode ? (
           <EditComponent
             contents={contents}
-            updatingField={updatingField}
             errorField={errorField}
             errorMessage={errorMessage}
             saveToSupabase={saveToSupabase}
@@ -126,7 +125,12 @@ const RestaurantListItem = ({ restaurant }: Props) => {
         } select-none`}
         onClick={() => setIsEditMode((prev) => !prev)}
       >
-        {isEditMode ? "VIEW" : "EDIT"}
+        {isLoading && (
+          <div className="absolute inset-y-0 right-0 flex items-center pr-1 pointer-events-none">
+            <div className="w-3 h-3 border-2 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+          </div>
+        )}
+        {!isLoading && isEditMode ? "VIEW" : "EDIT"}
       </div>
     </li>
   );

@@ -3,7 +3,6 @@ import { ContentItem } from "@types";
 
 interface Props {
   contents: ContentItem[][];
-  updatingField: string | null;
   errorField: string | null;
   errorMessage: string | null;
   saveToSupabase: (updateData: Record<string, string>) => void;
@@ -11,7 +10,6 @@ interface Props {
 
 const EditComponent = ({
   contents,
-  updatingField,
   errorField,
   errorMessage,
   saveToSupabase,
@@ -41,7 +39,6 @@ const EditComponent = ({
               width,
               selectedOptions = [],
             } = item || {};
-            const isUpdating = updatingField === key;
             const isFailed = errorField === key;
             return (
               <div
@@ -52,7 +49,7 @@ const EditComponent = ({
               >
                 {key === "status_number" || key === "is_visible" ? (
                   <select
-                    value={data ?? selectedOptions?.[0]?.[0]}
+                    value={String(data ?? selectedOptions?.[0]?.[0])}
                     className="w-full text-sm bg-transparent outline-none cursor-pointer"
                     onChange={(e) => saveToSupabase({ [key]: e.target.value })}
                   >
@@ -68,11 +65,10 @@ const EditComponent = ({
                 ) : (
                   <InnerInput
                     placeholder={label}
-                    value={data || ""}
-                    loading={isUpdating}
+                    value={String(data || "")}
                     error={isFailed ? errorMessage : ""}
-                    onChange={(e) => {
-                      if (key) saveToSupabase({ [key]: e.target.value });
+                    onChange={(value) => {
+                      if (key) saveToSupabase({ [key]: value });
                     }}
                   />
                 )}
