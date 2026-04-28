@@ -1,4 +1,5 @@
 import { InputHTMLAttributes, useEffect, useState } from "react";
+import SmallLoadingSpinner from "../loading/SmallLoadingSpinner";
 
 interface Props
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange"> {
@@ -7,6 +8,7 @@ interface Props
   loading?: boolean;
   value?: string;
   onChange: (value: string) => void;
+  validate?: (value: string) => boolean;
 }
 
 const InnerInput = ({
@@ -15,17 +17,29 @@ const InnerInput = ({
   loading,
   value = "",
   onChange,
+  validate,
   ...props
 }: Props) => {
   const [localValue, setLocalValue] = useState(value || "");
+  const [prevValue, setPrevValue] = useState(value);
 
-  useEffect(() => {
+  if (value !== prevValue) {
     setLocalValue(value);
-  }, [value]);
+    setPrevValue(value);
+  }
 
   const handleBlur = () => {
-    if (localValue !== value) {
-      onChange(localValue);
+    if (validate && localValue !== "" && !validate(localValue)) {
+      setLocalValue(value);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setLocalValue(newValue);
+    const isValid = validate ? validate(newValue) : true;
+    if (newValue === "" || isValid) {
+      onChange(newValue);
     }
   };
 
@@ -44,18 +58,14 @@ const InnerInput = ({
           `}
           value={localValue}
           placeholder={label}
-          onChange={(e) => setLocalValue(e.target.value)}
+          onChange={handleChange}
           onBlur={handleBlur}
           onKeyDown={(e) => {
             if (e.key === "Enter") (e.target as HTMLInputElement).blur();
           }}
           {...props}
         />
-        {loading && (
-          <div className="absolute inset-y-0 right-0 flex items-center pr-1 pointer-events-none">
-            <div className="w-3 h-3 border-2 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
-          </div>
-        )}
+        {loading && <SmallLoadingSpinner />}
       </div>
       {error && (
         <span className="mt-0.5 text-[10px] text-error font-medium leading-none">

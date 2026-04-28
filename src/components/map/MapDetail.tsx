@@ -1,6 +1,6 @@
 import ViewComponent from "@admin/restaurantListItem/ViewComponent";
 import { STATUS_LABELS } from "@constants";
-import { ContentItem, RestaurantType } from "@types";
+import { RestaurantListItemType, RestaurantType } from "@types";
 import { getOperatingHoursText } from "@utils";
 
 interface Props {
@@ -18,7 +18,7 @@ const MapDetail = ({ selectedRestaurant, onClose }: Props) => {
     operating_hours,
   } = selectedRestaurant || {};
 
-  const contents: ContentItem[][] = [
+  const contents: RestaurantListItemType[][] = [
     [
       { data: category, label: "카테고리" },
       { data: phone, label: "전화번호" },

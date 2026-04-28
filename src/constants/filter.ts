@@ -18,7 +18,7 @@ export const COORD_LABELS: Record<string, string> = {
 export const STATUS_LABELS: Record<string, string> = {
   all: "전체상태",
   "01": "영업중",
-  "02": "폐업",
+  "03": "폐업",
 };
 
 export const VISIBLE_LABELS: Record<string, string> = {
@@ -26,3 +26,18 @@ export const VISIBLE_LABELS: Record<string, string> = {
   true: "표시함",
   false: "표시안함",
 };
+
+export const STATUS_CYCLE = Object.keys(
+  STATUS_LABELS
+) as (keyof typeof STATUS_LABELS)[];
+export const COORD_CYCLE = Object.keys(
+  COORD_LABELS
+) as (keyof typeof COORD_LABELS)[];
+export const VISIBLE_CYCLE = Object.keys(
+  VISIBLE_LABELS
+) as (keyof typeof VISIBLE_LABELS)[];
+export const SORT_CYCLE = Object.keys(
+  SORT_LABELS
+) as (keyof typeof SORT_LABELS)[];
+
+export const DAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];

@@ -1,28 +1,33 @@
 import { InnerInput } from "@components/common";
-import { ContentItem, OperatingHour } from "@types";
+import { DAY_LABELS } from "@constants";
+import { RestaurantListItemType, OperatingHourType } from "@types";
 import { useMemo } from "react";
 
 interface Props {
-  contents: ContentItem[][];
-  operatingHours: OperatingHour[];
-  errorField: string | null;
+  contents: RestaurantListItemType[][];
+  operatingHours: OperatingHourType[];
   errorMessage: string | null;
+  errorId: string | number | null;
   saveToSupabase: (updateData: Record<string, string>) => void;
   saveOperatingHours: (payload: {
     id: number;
-    data: Partial<OperatingHour>;
+    data: Partial<OperatingHourType>;
+  }) => void;
+  saveOperatingHoursDirect: (payload: {
+    id: number;
+    data: Partial<OperatingHourType>;
   }) => void;
 }
 
 const EditComponent = ({
   contents,
   operatingHours,
-  errorField,
+  errorId,
   errorMessage,
   saveToSupabase,
   saveOperatingHours,
+  saveOperatingHoursDirect,
 }: Props) => {
-  const DAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
   const TIME_FIELDS = [
     { key: "open_time", label: "Open", placeholder: "11:00" },
     { key: "close_time", label: "Close", placeholder: "20:00" },
@@ -30,43 +35,20 @@ const EditComponent = ({
     { key: "break_start", label: "Break Start", placeholder: "15:00" },
     { key: "break_end", label: "Break End", placeholder: "17:00" },
   ] as const;
+  const timeValidator = (val: string) =>
+    /^([01]\d|2[0-3]):([0-5]\d)$/.test(val);
 
   const displayHours = useMemo(() => {
-    const sorted = [...operatingHours].sort(
-      (a, b) => a.day_of_week - b.day_of_week
+    return Array.from(
+      { length: 7 },
+      (_, i) =>
+        operatingHours.find((oh) => oh.day_of_week === i) ||
+        ({ id: i, day_of_week: i, is_off: false } as OperatingHourType)
     );
-    return Array.from({ length: 7 }, (_, i) => {
-      const existing = sorted.find((oh) => oh.day_of_week === i);
-      return (
-        existing ||
-        ({
-          id: i,
-          is_off: false,
-          day_of_week: i,
-          open_time: null,
-          close_time: null,
-          last_order: null,
-          break_start: null,
-          break_end: null,
-        } as OperatingHour)
-      );
-    });
   }, [operatingHours]);
 
-  const toggleOff = (oh: OperatingHour) => {
-    console.log({
-      id: oh.id,
-      data: {
-        is_off: !oh.is_off,
-        day_of_week: oh.day_of_week,
-        open_time: null,
-        close_time: null,
-        break_start: null,
-        break_end: null,
-        last_order: null,
-      },
-    });
-    saveOperatingHours({
+  const toggleOff = (oh: OperatingHourType) => {
+    saveOperatingHoursDirect({
       id: oh.id,
       data: {
         is_off: !oh.is_off,
@@ -84,20 +66,17 @@ const EditComponent = ({
     if (index === 0) return;
     const prev = displayHours[index - 1];
     const curr = displayHours[index];
-    const updateData = {
-      is_off: prev.is_off ?? false,
-      day_of_week: curr.day_of_week,
-      open_time: prev.open_time,
-      close_time: prev.close_time,
-      break_start: prev.break_start,
-      break_end: prev.break_end,
-      last_order: prev.last_order,
-    };
-
-    console.log(updateData);
-    saveOperatingHours({
+    saveOperatingHoursDirect({
       id: curr.id,
-      data: updateData,
+      data: {
+        is_off: prev.is_off ?? false,
+        day_of_week: curr.day_of_week,
+        open_time: prev.open_time,
+        close_time: prev.close_time,
+        break_start: prev.break_start,
+        break_end: prev.break_end,
+        last_order: prev.last_order,
+      },
     });
   };
 
@@ -126,7 +105,7 @@ const EditComponent = ({
               width,
               selectedOptions = [],
             } = item || {};
-            const isFailed = errorField === key;
+            const isFailed = errorId === key;
             if (key === "operating_hours") return;
             return (
               <div
@@ -135,7 +114,9 @@ const EditComponent = ({
        `}
                 style={{ flex: width || 1 }}
               >
-                {key === "status_number" || key === "is_visible" ? (
+                {key === "status_number" ||
+                key === "is_visible" ||
+                key === "has_room" ? (
                   <select
                     value={String(data ?? selectedOptions?.[0]?.[0])}
                     className="w-full text-sm bg-transparent outline-none cursor-pointer"
@@ -182,27 +163,36 @@ const EditComponent = ({
                 </div>
               ) : (
                 <div className="grid grid-cols-[repeat(5,1fr)] items-end gap-2">
-                  {TIME_FIELDS.map((field) => (
-                    <div
-                      key={`${oh.id}-${field.key}`}
-                      className="flex flex-col"
-                    >
-                      <span className="text-[9px] text-gray-400 uppercase">
-                        {field.label}
-                      </span>
-                      <InnerInput
-                        type="text"
-                        value={oh[field.key]?.toString().substring(0, 5) || ""}
-                        placeholder={field.placeholder}
-                        onChange={(value) => {
-                          saveOperatingHours({
-                            id: oh.id,
-                            data: { [field.key]: value },
-                          });
-                        }}
-                      />
-                    </div>
-                  ))}
+                  {TIME_FIELDS.map((field) => {
+                    const isMatch = String(errorId) === String(oh.id);
+                    return (
+                      <div
+                        key={`${oh.id}-${field.key}`}
+                        className="flex flex-col"
+                      >
+                        <span className="text-[9px] text-gray-400 uppercase">
+                          {field.label}
+                        </span>
+                        <InnerInput
+                          type="text"
+                          key={`input-${oh.id}-${field.key}`}
+                          value={oh[field.key] || ""}
+                          validate={timeValidator}
+                          placeholder={field.placeholder}
+                          error={isMatch ? errorMessage : ""}
+                          onChange={(value) => {
+                            saveOperatingHours({
+                              id: oh.id,
+                              data: {
+                                [field.key]: value,
+                                day_of_week: oh.day_of_week,
+                              },
+                            });
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               )}
               <div className="flex gap-2 items-center text-blue-400">
@@ -234,8 +224,8 @@ const EditComponent = ({
 const S_DOT =
   "relative mr-4 after:content-[''] after:absolute after:w-0.5 after:h-0.5 after:top-1/2 after:-right-2 after:-translate-y-1/2 after:rounded-full after:bg-gray-400";
 const getDayColor = (day: number) => {
-  if (day === 0) return "text-red-500";
-  if (day === 6) return "text-blue-500";
+  if (day === 5) return "text-blue-500";
+  if (day === 6) return "text-red-500";
   return "text-gray-600";
 };
 

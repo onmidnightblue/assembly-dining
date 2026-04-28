@@ -1,249 +1,108 @@
-// src/store/useRestaurantStore.ts
 import { create } from "zustand";
-import { RestaurantType } from "@types";
 import {
-  COORD_LABELS,
-  SORT_LABELS,
-  STATUS_LABELS,
-  VISIBLE_LABELS,
+  COORD_CYCLE,
+  SORT_CYCLE,
+  STATUS_CYCLE,
+  VISIBLE_CYCLE,
 } from "@constants";
+import {
+  CoordFilterType,
+  RestaurantType,
+  SortFilterType,
+  StatusFilterType,
+  TimeType,
+  VisibleFilterType,
+} from "@types";
 
-export type StatusOrder = keyof typeof STATUS_LABELS;
-export type VisibleOrder = keyof typeof VISIBLE_LABELS;
-export type CoordOrder = keyof typeof COORD_LABELS;
-export type SortOrder = keyof typeof SORT_LABELS;
-export const STATUS_CYCLE: StatusOrder[] = ["all", "01", "02"];
-export const VISIBLE_CYCLE: VisibleOrder[] = ["all", "true", "false"];
-export const SORT_CYCLE: SortOrder[] = [
-  "address_asc",
-  "address_desc",
-  "name_asc",
-  "name_desc",
-  "category_asc",
-  "category_desc",
-  "coord_asc",
-  "coord_desc",
-];
-export const COORD_CYCLE: CoordOrder[] = ["all", "with_coord", "no_coord"];
-export interface TimeFilter {
-  day: number; // 0 (일) ~ 6 (토)
-  time: string; // "HH:mm"
-}
-
-interface RestaurantStore {
+export interface RestaurantStoreState {
   restaurants: RestaurantType[];
-  filteredRestaurants: RestaurantType[];
   categories: string[];
   selectedCategories: string[];
   searchTerm: string;
-  sortOrder: SortOrder;
-  coordOrder: CoordOrder;
-  statusOrder: StatusOrder;
-  visibleOrder: VisibleOrder;
+  sortOrder: SortFilterType;
+  coordOrder: CoordFilterType;
+  statusOrder: StatusFilterType;
+  visibleOrder: VisibleFilterType;
+  targetTimeFilter: TimeType | null;
   visibleCount: number;
-  setSortOrder: (order?: SortOrder) => void;
-  setCoordOrder: (order?: CoordOrder) => void;
-  setStatusOrder: (order?: StatusOrder) => void;
-  setVisibleOrder: (order?: VisibleOrder) => void;
-  setRestaurants: (data: RestaurantType[]) => void;
-  toggleCategory: (category: string) => void;
-  setSearchTerm: (term: string) => void;
-  loadMore: () => void;
-  resetFilters: () => void;
-  targetTimeFilter: TimeFilter | null;
-  setTargetTimeFilter: (filter: TimeFilter | null) => void;
 }
 
-export const useRestaurantStore = create<RestaurantStore>((set) => {
-  const cycleOrder = <
-    T extends keyof RestaurantStore,
-    V extends RestaurantStore[T]
-  >(
-    key: T,
-    cycle: V[],
-    explicitOrder?: V
-  ) => {
-    set((state) => {
-      const isExplicitValid =
-        explicitOrder !== undefined && cycle.includes(explicitOrder);
-      const nextOrder = isExplicitValid
-        ? explicitOrder
-        : cycle[(cycle.indexOf(state[key] as V) + 1) % cycle.length];
-      const newState = { ...state, [key]: nextOrder };
-      return {
-        [key]: nextOrder,
-        filteredRestaurants: applyFilters(newState, {}),
+interface RestaurantStoreActions {
+  setFilter: <K extends keyof RestaurantStoreState>(
+    key: K,
+    value: RestaurantStoreState[K]
+  ) => void;
+  cycleFilter: <K extends keyof RestaurantStoreState>(
+    key: K,
+    cycle: RestaurantStoreState[K][]
+  ) => void;
+  resetFilters: () => void;
+  loadMore: () => void;
+  toggleCategory: (category: string) => void;
+  setTargetTimeFilter: (filter: TimeType | null) => void;
+}
+
+export const useRestaurantStore = create<
+  RestaurantStoreState & RestaurantStoreActions
+>((set) => ({
+  // states
+  restaurants: [],
+  categories: [],
+  selectedCategories: [],
+  searchTerm: "",
+  sortOrder: SORT_CYCLE[0],
+  coordOrder: COORD_CYCLE[0],
+  statusOrder: STATUS_CYCLE[0],
+  visibleOrder: VISIBLE_CYCLE[0],
+  targetTimeFilter: null,
+  visibleCount: 20,
+
+  // actions
+  setFilter: (key, value) =>
+    set(() => {
+      const newState: Partial<RestaurantStoreState> = {
+        [key]: value,
+        visibleCount: 20,
       };
-    });
-  };
-
-  return {
-    restaurants: [],
-    filteredRestaurants: [],
-    categories: [],
-    selectedCategories: [],
-    searchTerm: "",
-    visibleCount: 20,
-
-    statusOrder: STATUS_CYCLE[0],
-    visibleOrder: VISIBLE_CYCLE[0],
-    coordOrder: COORD_CYCLE[0],
-    sortOrder: SORT_CYCLE[0],
-
-    setRestaurants: (data) => {
-      set((state) => {
+      if (key === "restaurants" && Array.isArray(value)) {
+        const restaurants = value as RestaurantType[];
         const uniqueCategories = Array.from(
-          new Set(
-            data.map((restaurant) => restaurant.category || "").filter(Boolean)
-          )
+          new Set(restaurants.map((r) => r.category).filter(Boolean))
         ).sort();
-        return {
-          restaurants: data,
-          filteredRestaurants: applyFilters(
-            { ...state, restaurants: data },
-            {}
-          ),
-          categories: uniqueCategories,
-        };
-      });
-    },
-
-    toggleCategory: (category) =>
-      set((state) => {
-        const next = state.selectedCategories.includes(category)
-          ? state.selectedCategories.filter((c) => c !== category)
-          : [...state.selectedCategories, category];
-        return {
-          selectedCategories: next,
-          visibleCount: 20,
-          filteredRestaurants: applyFilters(state, {
-            selectedCategories: next,
-          }),
-        };
-      }),
-
-    setSearchTerm: (term) =>
-      set((state) => ({
-        searchTerm: term,
+        newState.categories = uniqueCategories;
+      }
+      return newState;
+    }),
+  cycleFilter: <K extends keyof RestaurantStoreState>(
+    key: K,
+    cycle: RestaurantStoreState[K][]
+  ) =>
+    set((state) => {
+      const currentIndex = cycle.indexOf(state[key]);
+      const nextIndex = (currentIndex + 1) % cycle.length;
+      return {
+        [key]: cycle[nextIndex],
         visibleCount: 20,
-        filteredRestaurants: applyFilters(state, { searchTerm: term }),
-      })),
+      } as Partial<RestaurantStoreState & RestaurantStoreActions>;
+    }),
+  loadMore: () => set((state) => ({ visibleCount: state.visibleCount + 20 })),
+  resetFilters: () =>
+    set({
+      selectedCategories: [],
+      searchTerm: "",
+      sortOrder: SORT_CYCLE[0],
+      coordOrder: COORD_CYCLE[0],
+      visibleCount: 20,
+    }),
+  toggleCategory: (category) =>
+    set((state) => {
+      const isSelected = state.selectedCategories.includes(category);
+      const nextCategories = isSelected
+        ? state.selectedCategories.filter((c) => c !== category)
+        : [...state.selectedCategories, category];
 
-    setSortOrder: (order) => cycleOrder("sortOrder", SORT_CYCLE, order),
-    setCoordOrder: (order) => cycleOrder("coordOrder", COORD_CYCLE, order),
-    setStatusOrder: (order) => cycleOrder("statusOrder", STATUS_CYCLE, order),
-    setVisibleOrder: (order) =>
-      cycleOrder("visibleOrder", VISIBLE_CYCLE, order),
-
-    targetTimeFilter: null,
-    setTargetTimeFilter: (filter) => set({ targetTimeFilter: filter }),
-
-    loadMore: () => set((state) => ({ visibleCount: state.visibleCount + 20 })),
-
-    resetFilters: () =>
-      set((state) => ({
-        selectedCategories: [],
-        searchTerm: "",
-        sortOrder: SORT_CYCLE[0],
-        visibleCount: 20,
-        coordOrder: COORD_CYCLE[0],
-        filteredRestaurants: state.restaurants.sort((a, b) =>
-          a.land_address.localeCompare(b.land_address, "ko")
-        ),
-      })),
-  };
-});
-
-// helper
-const applyFilters = (
-  state: RestaurantStore,
-  updates: Partial<RestaurantStore>
-) => {
-  const {
-    targetTimeFilter,
-    restaurants,
-    coordOrder,
-    selectedCategories,
-    searchTerm,
-    sortOrder,
-    statusOrder,
-    visibleOrder,
-  } = {
-    ...state,
-    ...updates,
-  };
-
-  const result = restaurants.filter((restaurant) => {
-    const conditions = [
-      selectedCategories.length === 0 ||
-        selectedCategories.includes(restaurant.category || ""),
-      !searchTerm ||
-        restaurant.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        restaurant.keyword?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        restaurant.category?.includes(searchTerm),
-      coordOrder === "all"
-        ? true
-        : coordOrder === "with_coord"
-        ? !!restaurant.map_x && !!restaurant.map_y
-        : !restaurant.map_x || !restaurant.map_y,
-      statusOrder === "all" || restaurant.status_number === statusOrder,
-      visibleOrder === "all" || String(restaurant.is_visible) === visibleOrder,
-    ];
-
-    if (targetTimeFilter) {
-      const { day, time } = targetTimeFilter;
-      const targetInt = parseInt(time.replace(":", ""));
-
-      const schedule = restaurant.operating_hours?.find(
-        (oh) => oh.day_of_week === day
-      );
-      if (!schedule || !schedule.open_time || !schedule.close_time)
-        return false;
-
-      const open = parseInt(
-        schedule.open_time.replace(/:/g, "").substring(0, 4)
-      );
-      let close = parseInt(
-        schedule.close_time.replace(/:/g, "").substring(0, 4)
-      );
-      if (close <= open) close += 2400;
-      const checkTime =
-        targetInt < open && targetInt < 600 ? targetInt + 2400 : targetInt;
-      const isOpen = checkTime >= open && checkTime < close;
-
-      // break time
-      const bStart = schedule.break_start
-        ? parseInt(schedule.break_start.replace(/:/g, "").substring(0, 4))
-        : null;
-      const bEnd = schedule.break_end
-        ? parseInt(schedule.break_end.replace(/:/g, "").substring(0, 4))
-        : null;
-      const isBreak =
-        bStart && bEnd ? checkTime >= bStart && checkTime < bEnd : false;
-
-      if (!isOpen || isBreak) return false;
-    }
-
-    return conditions.every(Boolean);
-  });
-
-  const sortFunctions: Record<
-    SortOrder,
-    (a: RestaurantType, b: RestaurantType) => number
-  > = {
-    address_asc: (a, b) => a.land_address.localeCompare(b.land_address, "ko"),
-    address_desc: (a, b) => b.land_address.localeCompare(a.land_address, "ko"),
-    name_asc: (a, b) => a.name.localeCompare(b.name, "ko"),
-    name_desc: (a, b) => b.name.localeCompare(a.name, "ko"),
-    category_asc: (a, b) =>
-      (a.category || "").localeCompare(b.category || "", "ko"),
-    category_desc: (a, b) =>
-      (b.category || "").localeCompare(a.category || "", "ko"),
-    coord_asc: (a, b) => (Number(a.x) || 0) - (Number(b.x) || 0),
-    coord_desc: (a, b) => (Number(b.x) || 0) - (Number(a.x) || 0),
-  };
-  return result.sort((a, b) => {
-    const comparison = sortFunctions[sortOrder]?.(a, b) ?? 0;
-    return comparison === 0 ? a.id.localeCompare(b.id) : comparison;
-  });
-};
+      return { selectedCategories: nextCategories, visibleCount: 20 };
+    }),
+  setTargetTimeFilter: (filter) =>
+    set({ targetTimeFilter: filter, visibleCount: 20 }),
+}));

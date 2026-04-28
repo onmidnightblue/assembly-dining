@@ -1,4 +1,11 @@
-export interface OperatingHour {
+import {
+  COORD_LABELS,
+  SORT_LABELS,
+  STATUS_LABELS,
+  VISIBLE_LABELS,
+} from "@constants";
+
+export interface OperatingHourType {
   id: number;
   restaurant_id: string;
   day_of_week: number;
@@ -27,7 +34,7 @@ export interface RestaurantType {
   is_visible: string;
   has_room: string;
   keyword: string;
-  operating_hours: OperatingHour[];
+  operating_hours: OperatingHourType[];
 
   // original
   OPNSFTEAMCODE: string; // 개방자치단체코드
@@ -76,7 +83,7 @@ export interface RestaurantType {
   HOMEPAGE: string; // 홈페이지
 }
 
-export interface ContentItem {
+export interface RestaurantListItemType {
   key?: string | undefined;
   data: string | string[] | null;
   label: string;
@@ -85,10 +92,21 @@ export interface ContentItem {
   selectedOptions?: [string, string][];
 }
 
-export interface Comment {
+export interface CommentType {
   id: number;
   restaurant_id: string;
   content: string;
   created_at: string;
 }
-export type UpdateType = "OPERATING_HOURS" | "COMMENTS" | "RESTAURANTS";
+
+export type SupabaseUpdateType = "OPERATING_HOURS" | "COMMENTS" | "RESTAURANTS";
+
+export type StatusFilterType = keyof typeof STATUS_LABELS;
+export type CoordFilterType = keyof typeof COORD_LABELS;
+export type VisibleFilterType = keyof typeof VISIBLE_LABELS;
+export type SortFilterType = keyof typeof SORT_LABELS;
+
+export interface TimeType {
+  day: number; // 0 (일) ~ 6 (토)
+  time: string; // "HH:mm"
+}

@@ -1,27 +1,19 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { RestaurantType } from "@types";
 import { useRestaurantStore } from "@store";
 import { useRestaurants } from "@hooks";
 import RestaurantListItem from "./RestaurantListItem";
 
 const RestaurantList = ({}) => {
-  const { isLoading, isError, restaurants: freshData } = useRestaurants();
-  const {
-    filteredRestaurants: restaurants,
-    visibleCount,
-    loadMore,
-    setRestaurants,
-  } = useRestaurantStore((state) => state);
+  const { isLoading, isError, restaurants } = useRestaurants();
+  const { visibleCount, loadMore } = useRestaurantStore((state) => state);
   const observerTarget = useRef(null);
-  const displayItems = restaurants.slice(0, visibleCount);
-  const hasMore = restaurants.length > visibleCount;
 
-  //  fresh
-  useEffect(() => {
-    if (freshData) {
-      setRestaurants(freshData);
-    }
-  }, [freshData, setRestaurants]);
+  // slice
+  const displayItems = useMemo(() => {
+    return restaurants.slice(0, visibleCount);
+  }, [restaurants, visibleCount]);
+  const hasMore = restaurants.length > visibleCount;
 
   // infinite scroll
   useEffect(() => {
@@ -66,6 +58,10 @@ const RestaurantList = ({}) => {
         <p className="text-error">Someting Wrong!</p>
       </div>
     );
+  }
+
+  if (!isLoading && displayItems.length === 0) {
+    return <div className="p-20 text-center">일치하는 식당이 없습니다.</div>;
   }
 
   return (

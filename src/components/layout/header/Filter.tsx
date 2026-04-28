@@ -1,3 +1,4 @@
+import { DAY_LABELS } from "@constants";
 import { useRestaurantStore } from "@store";
 
 const Filter = ({}) => {
@@ -8,7 +9,6 @@ const Filter = ({}) => {
     targetTimeFilter,
     setTargetTimeFilter,
   } = useRestaurantStore((state) => state);
-  const days = ["일", "월", "화", "수", "목", "금", "토"];
 
   const handleDayChange = (day: number) => {
     const currentTime = targetTimeFilter?.time || "12:00";
@@ -25,7 +25,7 @@ const Filter = ({}) => {
       <div className="flex flex-col gap-2">
         <p className="text-sm text-foreground-muted">카테고리</p>
         <div className="flex flex-wrap gap-2">
-          {categories.map((category) => {
+          {categories?.map((category) => {
             const isActive = selectedCategories.includes(category);
             return (
               <div
@@ -50,7 +50,7 @@ const Filter = ({}) => {
           <p className="text-sm text-foreground-muted">기준시간</p>
         </div>
         <div className="flex gap-1 overflow-x-auto relative">
-          {days.map((label, idx) => {
+          {DAY_LABELS.map((label, idx) => {
             const isActive = targetTimeFilter?.day === idx;
             return (
               <div

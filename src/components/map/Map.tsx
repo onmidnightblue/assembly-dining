@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   ReactZoomPanPinchRef,
   TransformComponent,
@@ -9,7 +9,6 @@ import {
 import { AssemblyMap } from "@assets";
 import { useMapActions, useMapCluster, useRestaurants } from "@hooks";
 import { RestaurantType } from "@types";
-import { useRestaurantStore } from "@store";
 import { Toast } from "@components/common";
 import MapPin from "./MapPin";
 import MapDetail from "./MapDetail";
@@ -17,9 +16,7 @@ import MapClusterMarker from "./MapClusterMarker";
 import MapControls from "./MapControls";
 
 const Map = ({}) => {
-  const { isLoading, isError, restaurants: freshData } = useRestaurants();
-  const { filteredRestaurants: restaurants, setRestaurants } =
-    useRestaurantStore((state) => state);
+  const { isLoading, isError, restaurants } = useRestaurants();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const transformComponentRef = useRef<ReactZoomPanPinchRef>(null);
@@ -27,12 +24,6 @@ const Map = ({}) => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [selectedRestaurant, setSelectedRestaurant] =
     useState<RestaurantType | null>(null);
-
-  useEffect(() => {
-    if (freshData) {
-      setRestaurants(freshData);
-    }
-  }, [freshData, setRestaurants]);
 
   const clusters = useMapCluster({ restaurants, scale });
   const { handleMapClick, handleReset } = useMapActions({

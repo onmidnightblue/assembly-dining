@@ -1,41 +1,47 @@
 import axios from "axios";
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@lib";
-import { RestaurantType } from "@types";
+import { GovApiResponse, RestaurantType } from "@types";
 
-export async function GET() {
-  try {
-    const BATCH_SIZE = 1000;
-    let startIndex = 1;
-    let endIndex = BATCH_SIZE;
-    let restaurants: RestaurantType[] = [];
+const BATCH_SIZE = 1000;
+const MAX_ITERATIONS = 100;
+const GOV_API_BASE_URL = `http://openapi.seoul.go.kr:8088/${process.env.GOV_API_KEY}/json/LOCALDATA_072404_YD`;
 
-    for (let i = 0; i < 100; i++) {
-      const GOV_API_URL = `http://openapi.seoul.go.kr:8088/${process.env.GOV_API_KEY}/json/LOCALDATA_072404_YD`;
-      const url = `${GOV_API_URL}/${startIndex}/${endIndex}`;
+const syncHandler = async (targetStatus: "01" | "03") => {
+  const supabase = supabaseServer();
+  if (!supabase) throw new Error("Supabase client instance creation failed.");
 
-      const response = await axios.get(url);
-      if (!response) break;
-      const { LOCALDATA_072404_YD } = response.data || {};
-      if (!LOCALDATA_072404_YD) break;
-      const { RESULT, row } = LOCALDATA_072404_YD || {};
+  let allProcessed: Partial<RestaurantType>[] = [];
+  let totalScanned = 0;
 
-      // INFO-000: 정상 처리되었습니다
-      if (RESULT?.CODE !== "INFO-000") break;
-      if (!row || row.length === 0) break;
-      const filteredData = row.filter((item: RestaurantType) => {
-        const { DTLSTATEGBN: isOperating, SITEWHLADDR: address } = item || {};
-        if (isOperating !== "01") return false;
-        if (!address.includes("여의도동")) return false;
-        const match = address.match(/여의도동\s(\d+)/);
-        if (match) {
-          const buildingNum = parseInt(match[1], 10);
+  for (let i = 0; i < MAX_ITERATIONS; i++) {
+    const startIndex = i * BATCH_SIZE + 1;
+    const endIndex = (i + 1) * BATCH_SIZE;
+
+    const { data } = await axios.get<GovApiResponse>(
+      `${GOV_API_BASE_URL}/${startIndex}/${endIndex}`
+    );
+    const result = data?.LOCALDATA_072404_YD;
+
+    if (result?.RESULT?.CODE !== "INFO-000" || !result?.row) break;
+
+    const rows: RestaurantType[] = result.row;
+    totalScanned = endIndex;
+
+    const filtered = rows
+      .filter((item) => {
+        const isTargetStatus = item.TRDSTATEGBN === targetStatus;
+        const isYeouido = item.SITEWHLADDR?.includes("여의도동");
+        if (!isTargetStatus || !isYeouido) return false;
+
+        const buildingMatch = item.SITEWHLADDR.match(/여의도동\s(\d+)/);
+        if (buildingMatch) {
+          const buildingNum = parseInt(buildingMatch[1], 10);
           return buildingNum >= 1 && buildingNum <= 19;
         }
         return false;
-      });
-
-      const mappedBatch = filteredData.map((item: RestaurantType) => ({
+      })
+      .map((item) => ({
         id: item.MGTNO,
         name: item.BPLCNM?.trim(),
         category: item.UPTAENM,
@@ -46,36 +52,43 @@ export async function GET() {
         x: item.X?.trim(),
         y: item.Y?.trim(),
       }));
-      restaurants = [...restaurants, ...mappedBatch];
-      startIndex += BATCH_SIZE;
-      endIndex += BATCH_SIZE;
+
+    if (filtered.length > 0) {
+      allProcessed = [...allProcessed, ...filtered];
     }
+  }
 
-    if (restaurants.length > 0) {
-      const supabase = supabaseServer();
-      if (!supabase)
-        throw new Error("Failed to create ther server client instance.");
-      const { data: updateData, error } = await supabase
-        .from("restaurants")
-        .upsert(restaurants, {
-          onConflict: "id",
-          ignoreDuplicates: true,
-        })
-        .select("id");
+  if (allProcessed.length === 0) return { totalScanned, updateCount: 0 };
+  const uniqueProcessed = Array.from(
+    new Map(allProcessed.map((item) => [item.id, item])).values()
+  );
 
-      if (error) {
-        console.error("Supabase error:", error.message);
-        throw error;
-      }
+  const { data: updateData, error } = await supabase
+    .from("restaurants")
+    .upsert(uniqueProcessed, {
+      onConflict: "id",
+      ignoreDuplicates: targetStatus === "01",
+    })
+    .select("id");
 
-      return NextResponse.json({
-        success: true,
-        total_scanned: endIndex,
-        filterCount: restaurants?.length || 0,
-        updateCount: updateData?.length || 0,
-        restaurants,
-      });
-    }
+  if (error) throw error;
+  return {
+    totalScanned,
+    updateCount: updateData?.length || 0,
+    data: uniqueProcessed,
+  };
+};
+
+export async function GET() {
+  try {
+    const result01 = await syncHandler("01");
+    const result03 = await syncHandler("03");
+
+    return NextResponse.json({
+      success: true,
+      operating: result01,
+      closed: result03,
+    });
   } catch (error: unknown) {
     const message = (error as Error)?.message ?? "Internal Server Error";
     return NextResponse.json(

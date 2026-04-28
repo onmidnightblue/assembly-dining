@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useRestaurants } from "@hooks";
-import { ContentItem, RestaurantType } from "@types";
+import { RestaurantListItemType, RestaurantType } from "@types";
 import EditComponent from "./restaurantListItem/EditComponent";
 import ViewComponent from "./restaurantListItem/ViewComponent";
 import { getOperatingHoursText } from "@utils";
+import { SmallLoadingSpinner } from "@components/common";
 
 interface Props {
   restaurant: RestaurantType;
@@ -25,24 +26,25 @@ const RestaurantListItem = ({ restaurant }: Props) => {
   } = restaurant || {};
   const [isEditMode, setIsEditMode] = useState(false);
   const {
-    saveOperatingHours,
-    operatingHours,
     saveToSupabase,
-    errorField,
+    saveOperatingHours,
+    saveOperatingHoursDirect,
+    operatingHours,
+    errorId,
     isLoading,
     errorMessage,
   } = useRestaurants(id);
 
-  const contents: ContentItem[][] = [
+  const contents: RestaurantListItemType[][] = [
     [
       {
         label: "상태",
         data: status_number || "01",
-        css: status_number === "02" ? "text-error" : "",
+        css: status_number === "01" ? "" : "text-error",
         key: "status_number",
         selectedOptions: [
           ["01", "운영"],
-          ["02", "폐업"],
+          ["03", "폐업"],
         ],
         width: 2,
       },
@@ -123,10 +125,11 @@ const RestaurantListItem = ({ restaurant }: Props) => {
           <EditComponent
             contents={contents}
             operatingHours={operatingHours}
-            errorField={errorField}
+            errorId={errorId}
             errorMessage={errorMessage}
             saveToSupabase={saveToSupabase}
             saveOperatingHours={saveOperatingHours}
+            saveOperatingHoursDirect={saveOperatingHoursDirect}
           />
         ) : (
           <ViewComponent contents={contents} />
@@ -143,11 +146,7 @@ const RestaurantListItem = ({ restaurant }: Props) => {
       >
         {isEditMode ? (
           <>
-            {isLoading && (
-              <div className="flex items-center pointer-events-none py-1 px-2">
-                <div className="w-3 h-3 border-2 border-blue-500 rounded-full border-t-transparent animate-spin" />
-              </div>
-            )}
+            {isLoading && <SmallLoadingSpinner />}
             {!isLoading && "VIEW"}
           </>
         ) : (

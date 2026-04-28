@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@lib";
-import { UpdateType } from "@types";
+import { SupabaseUpdateType } from "@types";
 
 export async function GET() {
   try {
@@ -41,21 +41,23 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     const { id, type, ...updateData } = body;
 
-    const hasValidId = id !== undefined && id !== null && id !== "";
-    const tableMap: Record<UpdateType, string> = {
-      OPERATING_HOURS: "operating_hours",
-      COMMENTS: "comments",
-      RESTAURANTS: "restaurants",
-    };
-    const targetTable = tableMap[(type as UpdateType) || "RESTAURANTS"];
-
     const supabase = supabaseServer();
     if (!supabase)
       throw new Error("Failed to create the server client instance.");
 
-    const { error } = await supabase
-      .from(targetTable)
-      .upsert(hasValidId ? { id, ...updateData } : { ...updateData });
+    const tableMap: Record<SupabaseUpdateType, string> = {
+      OPERATING_HOURS: "operating_hours",
+      COMMENTS: "comments",
+      RESTAURANTS: "restaurants",
+    };
+    const targetTable = tableMap[(type as SupabaseUpdateType) || "RESTAURANTS"];
+
+    const upsertPayload = { ...updateData };
+    if (id) upsertPayload.id = id;
+
+    const { error } = await supabase.from(targetTable).upsert(upsertPayload, {
+      onConflict: "id",
+    });
 
     if (error) {
       return NextResponse.json(
@@ -78,7 +80,7 @@ export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
-    const type = searchParams.get("type") as UpdateType | null;
+    const type = searchParams.get("type") as SupabaseUpdateType | null;
 
     if (!id || !type)
       return NextResponse.json(
@@ -90,7 +92,7 @@ export async function DELETE(request: Request) {
     if (!supabase)
       throw new Error("Failed to create the server client instance.");
 
-    const tableMap: Partial<Record<UpdateType, string>> = {
+    const tableMap: Partial<Record<SupabaseUpdateType, string>> = {
       COMMENTS: "comments",
       OPERATING_HOURS: "operating_hours",
     };
