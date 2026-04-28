@@ -51,6 +51,7 @@ export const useRestaurants = (id?: string) => {
     operatingHours,
     isLoading: isFetchLoading || isUpdating,
     errorMessage: mergeErrorMessage,
+    isError: !!mergeErrorMessage,
     ...mutations,
   };
 };

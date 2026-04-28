@@ -4,7 +4,7 @@ import { KEYWORD_SUGGESTIONS } from "@constants";
 import { useRestaurantStore } from "@store";
 
 const Search = () => {
-  const { setSearchTerm } = useRestaurantStore();
+  const { setFilter } = useRestaurantStore();
 
   const [isFocused, setIsFocused] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -51,7 +51,7 @@ const Search = () => {
         onBlur={() => setIsFocused(false)}
         onChange={(e) => {
           setInputValue(e.target.value);
-          setSearchTerm(e.target.value);
+          setFilter("searchTerm", e.target.value);
         }}
       />
     </div>

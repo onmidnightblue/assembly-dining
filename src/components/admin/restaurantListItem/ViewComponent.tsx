@@ -1,7 +1,7 @@
-import { ContentItem } from "@types";
+import { RestaurantListItemType } from "@types";
 
 interface Props {
-  contents: ContentItem[][];
+  contents: RestaurantListItemType[][];
 }
 
 const ViewComponent = ({ contents }: Props) => {
