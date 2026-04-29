@@ -52,6 +52,42 @@ export async function PATCH(request: Request) {
     };
     const targetTable = tableMap[(type as SupabaseUpdateType) || "RESTAURANTS"];
 
+    if (type === "OPERATING_HOURS") {
+      const timeFields = [
+        "open_time",
+        "close_time",
+        "break_start",
+        "break_end",
+        "last_order",
+      ];
+      const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+      for (const key of timeFields) {
+        const value = updateData[key];
+        if (value && typeof value === "string" && !timeRegex.test(value)) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Invalid Key: ${key}`,
+              fieldKey: key,
+            },
+            { status: 400 }
+          );
+        }
+      }
+
+      if (!updateData.restaurant_id && !id) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "'restaurant_id' is missing.",
+            fieldKey: "restaurant_id",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     const upsertPayload = { ...updateData };
     if (id) upsertPayload.id = id;
 

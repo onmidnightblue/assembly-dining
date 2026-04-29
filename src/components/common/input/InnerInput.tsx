@@ -33,12 +33,17 @@ const InnerInput = ({
     props.onBlur?.(e);
   };
 
-  const handleFocus = () => setIsFocused(true);
+  const handleFocus = () => {
+    setLocalValue(value);
+    setIsFocused(true);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setLocalValue(newValue);
-    if (newValue === "" || !validate || validate(newValue)) onChange(newValue);
+    if (newValue === "" || !validate || validate(newValue)) {
+      onChange(newValue);
+    }
   };
 
   return (
@@ -47,7 +52,7 @@ const InnerInput = ({
         <input
           className={`
        px-1 py-0.5 w-full bg-gray-100 outline-none text-foreground
-            ${error ? "border border-red-500" : "border-blue-200"}
+            ${error ? "border border-error" : "border-blue-200"}
             ${loading ? "pr-6 opacity-70" : ""}
           `}
           value={displayValue}

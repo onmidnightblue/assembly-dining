@@ -1,127 +1,52 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  OperatingHourType,
-  RestaurantType,
-  SupabaseUpdateType,
-  SupabaseValue,
-} from "@types";
-import axios, { AxiosError } from "axios";
+import { useMemo } from "react";
+import axios from "axios";
 import debounce from "lodash.debounce";
-import { useCallback, useEffect, useMemo } from "react";
-import { v4 } from "uuid";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { RestaurantType, SupabaseValue } from "@types";
 
-interface ApiErrorResponse {
-  success: boolean;
-  error?: string;
-  message?: string;
-}
-
-export const useRestaurantMutations = (id?: string) => {
+export const useRestaurantMutations = (restaurantId?: string) => {
   const queryClient = useQueryClient();
 
-  const invalidate = useMemo(
-    () =>
-      debounce(
-        () => queryClient.invalidateQueries({ queryKey: ["restaurants"] }),
-        300
-      ),
-    [queryClient]
-  );
-
   const mutation = useMutation({
-    mutationFn: async (vars: {
-      id: string | number;
-      data: Record<string, SupabaseValue>;
-      type: SupabaseUpdateType;
-    }) => {
-      const { data } = await axios.patch("/api/restaurants", {
-        id: vars.id,
-        type: vars.type,
-        ...vars.data,
+    mutationFn: async (data: Record<string, SupabaseValue>) => {
+      const { data: response } = await axios.patch("/api/restaurants", {
+        id: restaurantId,
+        type: "RESTAURANTS",
+        ...data,
       });
-      return data;
+      return response;
     },
-    onMutate: async (newVars) => {
+    onMutate: async (newData) => {
       await queryClient.cancelQueries({ queryKey: ["restaurants"] });
-      const previous = queryClient.getQueryData<RestaurantType[]>([
-        "restaurants",
-      ]);
-
+      const previous = queryClient.getQueryData(["restaurants"]);
       queryClient.setQueryData<RestaurantType[]>(["restaurants"], (old) => {
         if (!old) return [];
-        return old.map((rest) => {
-          if (newVars.type === "RESTAURANTS" && rest.id === newVars.id) {
-            return { ...rest, ...newVars.data };
-          }
-          if (newVars.type === "OPERATING_HOURS" && rest.id === id) {
-            const updatedHours = rest.operating_hours.map((oh) =>
-              oh.id === newVars.id ? { ...oh, ...newVars.data } : oh
-            );
-            return { ...rest, operating_hours: updatedHours };
-          }
-          return rest;
-        });
+        return old.map((rest) =>
+          rest.id === newData.id ? { ...rest, ...newData } : rest
+        );
       });
       return { previous };
     },
     onError: (err, _, context) => {
-      if (context?.previous) {
+      if (context?.previous)
         queryClient.setQueryData(["restaurants"], context.previous);
-      }
     },
-    onSettled: invalidate,
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["restaurants"] });
+    },
   });
-
-  const saveOperatingHours = useMemo(
-    () =>
-      debounce((payload: { id: number; data: Partial<OperatingHourType> }) => {
-        mutation.mutate({
-          id: payload.id,
-          data: payload.data as Record<string, SupabaseValue>,
-          type: "OPERATING_HOURS",
-        });
-      }, 300),
-    [mutation]
-  );
-
-  const saveOperatingHoursDirect = useCallback(
-    (payload: { id: number; data: Partial<OperatingHourType> }) => {
-      mutation.mutate({
-        id: payload.id,
-        data: payload.data as Record<string, SupabaseValue>,
-        type: "OPERATING_HOURS",
-      });
-    },
-    [mutation]
-  );
 
   const saveToSupabase = useMemo(
     () =>
       debounce((data: Record<string, SupabaseValue>) => {
-        if (id) mutation.mutate({ id, data, type: "RESTAURANTS" });
+        if (restaurantId) mutation.mutate(data);
       }, 100),
-    [id, mutation]
+    [restaurantId, mutation]
   );
-
-  const errorMessage = useMemo(() => {
-    if (!mutation.error) return null;
-    const axiosError = mutation.error as AxiosError<ApiErrorResponse>;
-    return axiosError.response?.data?.error || axiosError.message;
-  }, [mutation.error]);
-
-  useEffect(() => {
-    return () => {
-      saveToSupabase.cancel();
-      saveOperatingHours.cancel();
-    };
-  }, [saveToSupabase, saveOperatingHours]);
 
   return {
     saveToSupabase,
-    saveOperatingHours,
-    saveOperatingHoursDirect,
     isUpdating: mutation.isPending,
-    errorId: mutation.isError ? mutation.variables?.id : null,
-    errorMessage,
+    error: mutation.error,
   };
 };

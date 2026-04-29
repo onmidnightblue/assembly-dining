@@ -9,7 +9,7 @@ const GOV_API_BASE_URL = `http://openapi.seoul.go.kr:8088/${process.env.GOV_API_
 
 const syncHandler = async (targetStatus: "01" | "03") => {
   const supabase = supabaseServer();
-  if (!supabase) throw new Error("Supabase client instance creation failed.");
+  if (!supabase) throw new Error("Failed to create the server client instance");
 
   let allProcessed: Partial<RestaurantType>[] = [];
   let totalScanned = 0;

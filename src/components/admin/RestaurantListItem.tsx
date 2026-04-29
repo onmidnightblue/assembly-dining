@@ -1,36 +1,22 @@
 import { useState } from "react";
 import { useRestaurants } from "@hooks";
-import { RestaurantListItemType, RestaurantType } from "@types";
+import { RestaurantType } from "@types";
+import { SmallLoadingSpinner } from "@components/common";
 import EditComponent from "./restaurantListItem/EditComponent";
 import ViewComponent from "./restaurantListItem/ViewComponent";
-import { getOperatingHoursText } from "@utils";
-import { SmallLoadingSpinner } from "@components/common";
 
 interface Props {
   restaurant: RestaurantType;
 }
 
 const RestaurantListItem = ({ restaurant }: Props) => {
-  const {
-    id,
-    name,
-    keyword,
-    category,
-    land_address,
-    status_number,
-    phone,
-    map_x,
-    map_y,
-    is_visible,
-    has_room,
-  } = restaurant || {};
+  const { id, name } = restaurant || {};
   const [isEditMode, setIsEditMode] = useState(false);
   const {
     saveToSupabase,
     saveOperatingHours,
-    saveOperatingHoursDirect,
-    operatingHours,
     errorId,
+    fieldKey,
     isLoading,
     errorMessage,
   } = useRestaurants(id);
@@ -55,18 +41,14 @@ const RestaurantListItem = ({ restaurant }: Props) => {
         {isEditMode ? (
           <EditComponent
             restaurant={restaurant}
-            operatingHours={operatingHours}
             errorId={errorId}
+            fieldKey={fieldKey}
             errorMessage={errorMessage}
             saveToSupabase={saveToSupabase}
             saveOperatingHours={saveOperatingHours}
-            saveOperatingHoursDirect={saveOperatingHoursDirect}
           />
         ) : (
-          <ViewComponent
-            restaurant={restaurant}
-            operatingHours={operatingHours}
-          />
+          <ViewComponent restaurant={restaurant} />
         )}
         {isEditMode && (
           <div className="mt-4 text-xs text-blue-400">ID: {id}</div>

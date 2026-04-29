@@ -1,42 +1,28 @@
-import { useMemo } from "react";
 import { OperatingHourType, RestaurantType, SupabaseValue } from "@types";
 import EditOperatingHour from "./EditOperatingHour";
 import EditBasicInfo from "./EditBasicInfo";
 
 interface Props {
   restaurant: RestaurantType;
-  operatingHours: OperatingHourType[];
   errorMessage: string | null;
-  errorId: string | number | null;
+  errorId: string | number | null | undefined;
+  fieldKey?: string | null;
   saveToSupabase: (updateData: Record<string, SupabaseValue>) => void;
   saveOperatingHours: (payload: {
-    id: number;
-    data: Partial<OperatingHourType>;
-  }) => void;
-  saveOperatingHoursDirect: (payload: {
-    id: number;
+    id: string | number;
+    dayOfWeek: number;
     data: Partial<OperatingHourType>;
   }) => void;
 }
 
 const EditComponent = ({
   restaurant,
-  operatingHours,
   errorId,
+  fieldKey,
   errorMessage,
   saveToSupabase,
   saveOperatingHours,
-  saveOperatingHoursDirect,
 }: Props) => {
-  const displayHours = useMemo(() => {
-    return Array.from(
-      { length: 7 },
-      (_, i) =>
-        operatingHours.find((oh) => oh.day_of_week === i) ||
-        ({ id: i, day_of_week: i, is_off: false } as OperatingHourType)
-    );
-  }, [operatingHours]);
-
   const handlePaste = async (e: React.ClipboardEvent) => {
     const pasteData = e.clipboardData.getData("text");
     const xMatch = pasteData.match(/[xX]\s*[::]?\s*([0-9.]+)/);
@@ -59,11 +45,11 @@ const EditComponent = ({
         saveToSupabase={saveToSupabase}
       />
       <EditOperatingHour
-        displayHours={displayHours}
+        restaurant={restaurant}
         errorId={errorId}
+        fieldKey={fieldKey}
         errorMessage={errorMessage}
-        onUpdate={saveOperatingHours}
-        onDirectUpdate={saveOperatingHoursDirect}
+        saveOperatingHours={saveOperatingHours}
       />
     </div>
   );

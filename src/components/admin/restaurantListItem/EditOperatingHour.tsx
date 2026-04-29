@@ -1,25 +1,37 @@
-import { InnerInput } from "@components/common";
+import { useMemo } from "react";
 import { DAY_LABELS, TIME_FIELDS, TIME_REGEX } from "@constants";
-import { OperatingHourType } from "@types";
+import { OperatingHourType, RestaurantType } from "@types";
+import { InnerInput } from "@components/common";
 
 interface Props {
-  displayHours: OperatingHourType[];
-  errorId: string | number | null;
+  restaurant: RestaurantType;
+  errorId: string | number | null | undefined;
   errorMessage: string | null;
-  onUpdate: (payload: { id: number; data: Partial<OperatingHourType> }) => void;
-  onDirectUpdate: (payload: {
-    id: number;
+  fieldKey?: string | null;
+  saveOperatingHours: (payload: {
+    id: string | number;
+    dayOfWeek: number;
     data: Partial<OperatingHourType>;
   }) => void;
 }
 
 const EditOperatingHour = ({
-  displayHours,
+  restaurant,
   errorId,
+  fieldKey,
   errorMessage,
-  onUpdate,
-  onDirectUpdate,
+  saveOperatingHours,
 }: Props) => {
+  const { operating_hours } = restaurant || {};
+  const displayHours = useMemo(() => {
+    return Array.from(
+      { length: 7 },
+      (_, i) =>
+        operating_hours?.find((oh) => oh.day_of_week === i) ||
+        ({ id: i, day_of_week: i, is_off: false } as OperatingHourType)
+    );
+  }, [operating_hours]);
+
   const getDayColor = (day: number) => {
     if (day === 5) return "text-blue-500";
     if (day === 6) return "text-red-500";
@@ -43,7 +55,9 @@ const EditOperatingHour = ({
           ) : (
             <div className="grid grid-cols-[repeat(5,1fr)] items-end gap-2">
               {TIME_FIELDS.map((field) => {
-                const isMatch = String(errorId) === String(oh.id);
+                const isErrorField =
+                  errorId === oh.id &&
+                  (fieldKey === field.key || fieldKey === null);
                 return (
                   <div key={`${oh.id}-${field.key}`} className="flex flex-col">
                     <span className="text-[9px] text-gray-400 uppercase">
@@ -58,9 +72,13 @@ const EditOperatingHour = ({
                       }
                       validate={(value) => TIME_REGEX.test(value)}
                       placeholder={field.placeholder}
-                      error={isMatch ? errorMessage : ""}
+                      error={isErrorField ? errorMessage : ""}
                       onChange={(value) =>
-                        onUpdate({ id: oh.id, data: { [field.key]: value } })
+                        saveOperatingHours({
+                          id: oh.id,
+                          dayOfWeek: oh.day_of_week,
+                          data: { [field.key]: value },
+                        })
                       }
                     />
                   </div>
@@ -71,7 +89,11 @@ const EditOperatingHour = ({
           <div className="flex gap-2 items-center text-blue-400">
             <div
               onClick={() =>
-                onDirectUpdate({ id: oh.id, data: { is_off: !oh.is_off } })
+                saveOperatingHours({
+                  id: oh.id,
+                  dayOfWeek: oh.day_of_week,
+                  data: { is_off: !oh.is_off },
+                })
               }
               className={`text-sm cursor-pointer 
                     ${oh.is_off ? "text-error" : ""}
@@ -82,8 +104,9 @@ const EditOperatingHour = ({
             {index > 0 && !oh.is_off && (
               <div
                 onClick={() =>
-                  onDirectUpdate({
+                  saveOperatingHours({
                     id: oh.id,
+                    dayOfWeek: oh.day_of_week,
                     data: {
                       open_time: displayHours[index - 1].open_time,
                       close_time: displayHours[index - 1].close_time,

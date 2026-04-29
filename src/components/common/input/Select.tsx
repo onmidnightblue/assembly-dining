@@ -20,10 +20,7 @@ const Select = ({
   onChange,
   ...props
 }: Props) => {
-  const safeValue =
-    value !== null && value !== undefined
-      ? String(value)
-      : String(options[0]?.[0] || "");
+  const safeValue = value !== null && value !== undefined ? String(value) : "";
 
   return (
     <div>

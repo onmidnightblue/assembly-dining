@@ -4,55 +4,65 @@ import { OperatingHourType } from "@types";
 export const getOperatingHoursText = (hours: OperatingHourType[]) => {
   if (!hours || hours.length === 0) return "";
 
-  const groups: Record<string, number[]> = {};
+  const dayMap = new Map<number, string>();
   hours.forEach((oh) => {
-    const timeKey =
-      oh.is_off || !oh.open_time
-        ? "휴무"
-        : `${oh.open_time.substring(0, 5)} ~ ${oh.close_time?.substring(0, 5)}`;
-
-    if (!groups[timeKey]) groups[timeKey] = [];
-    groups[timeKey].push(oh.day_of_week);
-  });
-
-  const formattedGroups = Object.entries(groups).map(([time, days]) => {
-    days.sort((a, b) => a - b);
-
-    let dayText = "";
-    if (days.length === 7) {
-      dayText = "매일";
-    } else if (days.length === 5 && days[0] === 1 && days[4] === 5) {
-      dayText = "평일";
-    } else if (days.length === 2 && days.includes(0) && days.includes(6)) {
-      dayText = "주말";
-    } else {
-      dayText = formatDayRange(days, DAY_LABELS);
+    let text = "휴무";
+    if (!oh.is_off && oh.open_time) {
+      const open = oh.open_time.substring(0, 5);
+      const close = oh.close_time?.substring(0, 5) || "";
+      const lastOrder = oh.last_order?.substring(0, 5);
+      text = `${open}~${close}${lastOrder ? ` (주문마감 ${lastOrder})` : ""}`;
     }
-
-    return { dayText, time, isOff: time === "휴무" };
+    dayMap.set(oh.day_of_week, text);
   });
 
-  return formattedGroups
-    .sort((a) => (a.isOff ? 1 : -1))
-    .map((g) => `${g.dayText} ${g.time}`)
-    .join(" / ");
-};
+  const allTimes = Array.from(dayMap.values());
+  if (allTimes.length === 7 && allTimes.every((t) => t === allTimes[0])) {
+    return `매일 ${allTimes[0]}`;
+  }
 
-const formatDayRange = (days: number[], labels: string[]) => {
-  const parts: string[] = [];
-  let start = 0;
+  const result: string[] = [];
+  const dayOrder = [1, 2, 3, 4, 5, 6, 0];
 
-  for (let i = 0; i < days.length; i++) {
-    if (i + 1 < days.length && days[i + 1] === days[i] + 1) {
+  let i = 0;
+  while (i < dayOrder.length) {
+    const startDay = dayOrder[i];
+    const currentTime = dayMap.get(startDay);
+
+    if (currentTime === undefined) {
+      i++;
       continue;
     }
 
-    if (start === i) {
-      parts.push(labels[days[start]]);
-    } else {
-      parts.push(`${labels[days[start]]}~${labels[days[i]]}`);
+    const group: number[] = [startDay];
+    let j = i + 1;
+
+    while (j < dayOrder.length) {
+      const nextDay = dayOrder[j];
+      const nextTime = dayMap.get(nextDay);
+      if (nextTime !== currentTime) break;
+      if (dayOrder[j - 1] === 5 && nextDay === 6) break;
+      group.push(nextDay);
+      j++;
     }
-    start = i + 1;
+
+    const dayText = formatDayText(group);
+    result.push(`${dayText} ${currentTime}`);
+    i = j;
   }
-  return parts.join(", ");
+
+  return result.join(" / ");
+};
+
+const formatDayText = (days: number[]) => {
+  const getLabel = (dbDay: number) => {
+    const labelIdx = dbDay === 0 ? 6 : dbDay - 1;
+    return DAY_LABELS[labelIdx];
+  };
+  if (days.includes(6) && days.includes(0)) return "주말";
+  if (days.length === 5 && [1, 2, 3, 4, 5].every((d) => days.includes(d)))
+    return "평일";
+  if (days.length === 1) return getLabel(days[0]);
+  if (days.length === 2) return days.map(getLabel).join("");
+  return `${getLabel(days[0])}~${getLabel(days[days.length - 1])}`;
 };

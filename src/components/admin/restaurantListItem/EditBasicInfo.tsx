@@ -3,7 +3,7 @@ import { RestaurantType, SupabaseValue } from "@types";
 
 interface Props {
   restaurant: RestaurantType;
-  errorId: string | number | null;
+  errorId: string | number | null | undefined;
   errorMessage: string | null;
   saveToSupabase: (data: Record<string, SupabaseValue>) => void;
 }

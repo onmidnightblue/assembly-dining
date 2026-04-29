@@ -1,10 +1,18 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useRestaurantStore } from "@store";
 import { RestaurantType } from "@types";
 import { useRestaurantMutations } from "./useRestaurantMutations";
 import { searchFilter } from "@utils";
+import { useOperatingHoursMutations } from "./useOperatingHoursMutations ";
+
+interface ApiErrorResponse {
+  success: boolean;
+  error?: string;
+  message?: string;
+  fieldKey?: string | null;
+}
 
 export const useRestaurants = (id?: string) => {
   const store = useRestaurantStore();
@@ -22,36 +30,44 @@ export const useRestaurants = (id?: string) => {
     staleTime: 1000 * 60 * 30,
   });
 
-  const operatingHours = useMemo(() => {
-    if (!id) return [];
-    return restaurants.find((r) => r.id === id)?.operating_hours || [];
-  }, [id, restaurants]);
+  const {
+    saveToSupabase,
+    isUpdating: isUpdatingRestaurant,
+    error: errorRestaurant,
+  } = useRestaurantMutations(id);
+
+  const {
+    saveOperatingHours,
+    isUpdating: isUpdatingOH,
+    error: errorOH,
+    variables: variablesOH,
+  } = useOperatingHoursMutations(id);
 
   const filteredData = useMemo(
     () => searchFilter(restaurants, store),
     [restaurants, store]
   );
 
-  const {
-    errorMessage: mutationError,
-    isUpdating,
-    ...mutations
-  } = useRestaurantMutations(id);
-
-  const mergeErrorMessage = useMemo(() => {
-    const err = fetchError || mutationError;
-    if (!err) return null;
-    return axios.isAxiosError(err)
-      ? err.response?.data?.error || err.message
-      : (err as Error).message;
-  }, [fetchError, mutationError]);
+  const errorInfo = useMemo(() => {
+    const activeError = errorOH || errorRestaurant || fetchError;
+    if (!activeError) return { message: null, fieldKey: null };
+    const axiosError = activeError as AxiosError<ApiErrorResponse>;
+    const resData = axiosError.response?.data;
+    const message = resData?.error || resData?.message || axiosError.message;
+    return {
+      message: String(message),
+      fieldKey: resData?.fieldKey || null,
+    };
+  }, [errorOH, errorRestaurant, fetchError]);
 
   return {
     restaurants: filteredData,
-    operatingHours,
-    isLoading: isFetchLoading || isUpdating,
-    errorMessage: mergeErrorMessage,
-    isError: !!mergeErrorMessage,
-    ...mutations,
+    isLoading: isFetchLoading || isUpdatingRestaurant || isUpdatingOH,
+    errorMessage: errorInfo.message,
+    isError: !!errorInfo.message,
+    fieldKey: errorInfo.fieldKey,
+    errorId: errorOH ? variablesOH?.id : null,
+    saveToSupabase,
+    saveOperatingHours,
   };
 };

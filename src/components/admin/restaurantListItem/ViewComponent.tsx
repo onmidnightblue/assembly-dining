@@ -1,12 +1,11 @@
-import { OperatingHourType, RestaurantType } from "@types";
+import { RestaurantType } from "@types";
 import { getOperatingHoursText } from "@utils";
 
 interface Props {
   restaurant: RestaurantType;
-  operatingHours: OperatingHourType[];
 }
 
-const ViewComponent = ({ restaurant, operatingHours }: Props) => {
+const ViewComponent = ({ restaurant }: Props) => {
   const {
     status_number,
     is_visible,
@@ -17,6 +16,7 @@ const ViewComponent = ({ restaurant, operatingHours }: Props) => {
     keyword,
     map_x,
     map_y,
+    operating_hours,
   } = restaurant;
 
   const getHighlightColor = (isError: boolean) =>
@@ -30,11 +30,13 @@ const ViewComponent = ({ restaurant, operatingHours }: Props) => {
         >
           {status_number === "01" ? "운영" : "폐업"}
         </span>
-        <span className={`${getHighlightColor(!is_visible)} ${S_DOT}`}>
-          {is_visible ? "표시함" : "표시안함"}
+        <span
+          className={`${getHighlightColor(is_visible !== "true")} ${S_DOT}`}
+        >
+          {is_visible === "true" ? "표시함" : "표시안함"}
         </span>
-        <span className={getHighlightColor(!has_room)}>
-          {has_room ? "룸보유" : "룸없음"}
+        <span className={getHighlightColor(has_room !== "true")}>
+          {has_room === "true" ? "룸보유" : "룸없음"}
         </span>
       </div>
       <div className="flex items-center">
@@ -67,8 +69,12 @@ const ViewComponent = ({ restaurant, operatingHours }: Props) => {
           {map_y || "Y좌표"}
         </span>
       </div>
-      <div className="text-gray-600">
-        {getOperatingHoursText(operatingHours) || "운영시간"}
+      <div
+        className={`${
+          operating_hours?.length ? "text-foreground" : "text-placeholder"
+        }`}
+      >
+        {getOperatingHoursText(operating_hours) || "운영시간"}
       </div>
     </div>
   );
