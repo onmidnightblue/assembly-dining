@@ -7,7 +7,7 @@ interface Props {
   errorMessage: string | null;
   errorId: string | number | null | undefined;
   fieldKey?: string | null;
-  saveToSupabase: (updateData: Record<string, SupabaseValue>) => void;
+  updateFormData: (updateData: Record<string, SupabaseValue>) => void;
   saveOperatingHours: (payload: {
     id: string | number;
     dayOfWeek: number;
@@ -20,7 +20,7 @@ const EditComponent = ({
   errorId,
   fieldKey,
   errorMessage,
-  saveToSupabase,
+  updateFormData,
   saveOperatingHours,
 }: Props) => {
   const handlePaste = async (e: React.ClipboardEvent) => {
@@ -29,7 +29,7 @@ const EditComponent = ({
     const yMatch = pasteData.match(/[yY]\s*[::]?\s*([0-9.]+)/);
     if (xMatch && yMatch) {
       e.preventDefault();
-      saveToSupabase({
+      updateFormData({
         map_x: xMatch[1],
         map_y: yMatch[1],
       });
@@ -42,7 +42,7 @@ const EditComponent = ({
         restaurant={restaurant}
         errorId={errorId}
         errorMessage={errorMessage}
-        saveToSupabase={saveToSupabase}
+        updateFormData={updateFormData}
       />
       <EditOperatingHour
         restaurant={restaurant}

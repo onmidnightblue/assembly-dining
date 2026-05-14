@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRestaurants } from "@hooks";
-import { RestaurantType } from "@types";
+import { RestaurantType, SupabaseValue } from "@types";
 import { SmallLoadingSpinner } from "@components/common";
 import EditComponent from "./restaurantListItem/EditComponent";
 import ViewComponent from "./restaurantListItem/ViewComponent";
@@ -12,6 +12,7 @@ interface Props {
 const RestaurantListItem = ({ restaurant }: Props) => {
   const { id } = restaurant || {};
   const [isEditMode, setIsEditMode] = useState(false);
+  const [formData, setFormData] = useState<Record<string, SupabaseValue>>({});
   const {
     saveToSupabase,
     saveOperatingHours,
@@ -21,16 +22,38 @@ const RestaurantListItem = ({ restaurant }: Props) => {
     errorMessage,
   } = useRestaurants(id);
 
+  const updateFormData = (data: Record<string, SupabaseValue>) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const resetFormData = () => {
+    setFormData({});
+  };
+
+  const hasChanges = Object.keys(formData).length > 0;
+
+  const handleSave = async () => {
+    await saveToSupabase(formData);
+    resetFormData();
+    setIsEditMode(false);
+  };
+
   return (
     <li className="relative py-2 border-b border-b-gray-200">
       <div className="flex flex-col">
         {isEditMode ? (
           <EditComponent
-            restaurant={restaurant}
+            restaurant={{
+              ...restaurant,
+              ...formData,
+            }}
             errorId={errorId}
             fieldKey={fieldKey}
             errorMessage={errorMessage}
-            saveToSupabase={saveToSupabase}
+            updateFormData={updateFormData}
             saveOperatingHours={saveOperatingHours}
           />
         ) : (
@@ -40,19 +63,37 @@ const RestaurantListItem = ({ restaurant }: Props) => {
           <div className="mt-4 text-xs text-blue-400">ID: {id}</div>
         )}
       </div>
-      <div
-        className={`absolute top-2 right-0 text-right px-1 text-sm transition duration-300 border border-white rounded cursor-pointer hover:border-black ${
-          isEditMode ? "text-blue-400" : "text-foreground"
-        } select-none`}
-        onClick={() => setIsEditMode((prev) => !prev)}
-      >
+      <div className={`absolute top-2 right-0 text-right px-1 text-sm`}>
         {isEditMode ? (
-          <>
+          <div className="flex gap-4">
             {isLoading && <SmallLoadingSpinner />}
-            {!isLoading && "VIEW"}
-          </>
+            {!isLoading && (
+              <>
+                <button
+                  className="text-error disabled:text-placeholder disabled:cursor-not-allowed"
+                  onClick={resetFormData}
+                  disabled={!hasChanges}
+                >
+                  RESTORE
+                </button>
+                <button
+                  className="text-green-600 disabled:text-placeholder disabled:cursor-not-allowed"
+                  onClick={handleSave}
+                  disabled={!hasChanges}
+                >
+                  SAVE
+                </button>
+                <button
+                  className=" text-blue-400 cursor-pointer"
+                  onClick={() => setIsEditMode(false)}
+                >
+                  CANCEL
+                </button>
+              </>
+            )}
+          </div>
         ) : (
-          "EDIT"
+          <button onClick={() => setIsEditMode(true)}>EDIT</button>
         )}
       </div>
     </li>

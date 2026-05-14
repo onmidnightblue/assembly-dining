@@ -1,6 +1,4 @@
-import { useMemo } from "react";
 import axios from "axios";
-import debounce from "lodash.debounce";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { RestaurantType, SupabaseValue } from "@types";
 
@@ -16,41 +14,26 @@ export const useRestaurantMutations = (restaurantId?: string) => {
       });
       return response;
     },
-    onMutate: async (newData) => {
-      await queryClient.cancelQueries({ queryKey: ["restaurants"] });
-      const previous = queryClient.getQueryData(["restaurants"]);
+    onSuccess: (responseData, variables) => {
       queryClient.setQueryData<RestaurantType[]>(["restaurants"], (old) => {
         if (!old) return [];
         return old.map((rest) =>
-          rest.id === restaurantId ? { ...rest, ...newData } : rest
+          String(rest.id) === String(restaurantId)
+            ? {
+                ...rest,
+                ...variables,
+                ...responseData,
+              }
+            : rest
         );
       });
-      return { previous };
-    },
-    onSuccess: (responseData) => {
-      queryClient.setQueryData<RestaurantType[]>(["restaurants"], (old) => {
-        if (!old) return [];
-        return old.map((rest) =>
-          rest.id === restaurantId ? { ...rest, ...responseData } : rest
-        );
-      });
-    },
-    onError: (err, _, context) => {
-      if (context?.previous)
-        queryClient.setQueryData(["restaurants"], context.previous);
-    },
-    onSettled: () => {
-      // queryClient.invalidateQueries({ queryKey: ["restaurants"] });
     },
   });
 
-  const saveToSupabase = useMemo(
-    () =>
-      debounce((data: Record<string, SupabaseValue>) => {
-        if (restaurantId) mutation.mutate(data);
-      }, 100),
-    [restaurantId, mutation]
-  );
+  const saveToSupabase = async (data: Record<string, SupabaseValue>) => {
+    if (!restaurantId) return;
+    return mutation.mutateAsync(data);
+  };
 
   return {
     saveToSupabase,
