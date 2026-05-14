@@ -24,12 +24,12 @@ const EditBasicInfo = ({
     ["03", "폐업"],
   ];
   const VISIBLE_OPTIONS: [string, string][] = [
-    ["true", "표시함"],
-    ["false", "표시안함"],
+    ["TRUE", "표시함"],
+    ["FALSE", "표시안함"],
   ];
   const ROOM_OPTIONS: [string, string][] = [
-    ["true", "룸보유"],
-    ["false", "룸없음"],
+    ["TRUE", "룸보유"],
+    ["FALSE", "룸없음"],
   ];
 
   return (
@@ -61,13 +61,13 @@ const EditBasicInfo = ({
           <Select
             options={VISIBLE_OPTIONS}
             value={String(restaurant.is_visible)}
-            onChange={(v) => saveToSupabase({ is_visible: v === "true" })}
+            onChange={(v) => saveToSupabase({ is_visible: v === "TRUE" })}
             error={errorId === "is_visible" ? errorMessage : null}
           />
           <Select
             options={ROOM_OPTIONS}
             value={String(restaurant.has_room)}
-            onChange={(v) => saveToSupabase({ has_room: v === "true" })}
+            onChange={(v) => saveToSupabase({ has_room: v === "TRUE" })}
             error={errorId === "has_room" ? errorMessage : null}
           />
         </div>

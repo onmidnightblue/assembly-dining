@@ -53,11 +53,11 @@ const Map = ({}) => {
       <TransformWrapper
         initialScale={1}
         minScale={1}
-        maxScale={4}
+        maxScale={14}
         limitToBounds={false}
         smooth={true}
         wheel={{
-          step: 0.001,
+          step: 0.003,
           wheelDisabled: false,
           touchPadDisabled: false,
         }}

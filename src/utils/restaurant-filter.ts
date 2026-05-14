@@ -46,7 +46,7 @@ export const searchFilter = (
   const {
     selectedCategories = [],
     searchTerm = "",
-    coordOrder = "all",
+    operatingOrder = "all",
     statusOrder = "all",
     visibleOrder = "all",
     targetTimeFilter = null,
@@ -61,11 +61,9 @@ export const searchFilter = (
         [restaurant.name, restaurant.keyword, restaurant.category].some((val) =>
           val?.toLowerCase().includes(searchTerm.toLowerCase())
         ),
-      coordOrder === "all"
-        ? true
-        : coordOrder === "with_coord"
-        ? !!restaurant.map_x && !!restaurant.map_y
-        : !restaurant.map_x || !restaurant.map_y,
+      operatingOrder === "all" ||
+        (operatingOrder === "with_operating") ===
+          restaurant?.operating_hours?.length > 0,
       statusOrder === "all" || restaurant.status_number === statusOrder,
       visibleOrder === "all" || String(restaurant.is_visible) === visibleOrder,
       targetTimeFilter

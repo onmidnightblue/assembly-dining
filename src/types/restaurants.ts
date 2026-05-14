@@ -1,5 +1,5 @@
 import {
-  COORD_LABELS,
+  OPERATING_LABELS,
   SORT_LABELS,
   STATUS_LABELS,
   VISIBLE_LABELS,
@@ -100,7 +100,7 @@ export interface CommentType {
 }
 
 export type StatusFilterType = keyof typeof STATUS_LABELS;
-export type CoordFilterType = keyof typeof COORD_LABELS;
+export type OperationgFilterType = keyof typeof OPERATING_LABELS;
 export type VisibleFilterType = keyof typeof VISIBLE_LABELS;
 export type SortFilterType = keyof typeof SORT_LABELS;
 

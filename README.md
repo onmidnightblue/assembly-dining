@@ -21,7 +21,7 @@ onmidnightblue' blog
 2. 🏛️ Assembly Dining
 
 - **Path:** `src/app/assembly-dining`
-- 지하층부터 지상층까지 분산되어 있어 찾기 어려운 국회 앞 맛집을 모았습니다.
+- 국회 앞 맛집 정보를 전합니다.
 
 <br><br>
 
@@ -31,6 +31,8 @@ onmidnightblue' blog
 - Language: `TypeScript`
 - Styling: `Tailwind CSS`
 - Deployment: `Vercel`
+
+<br><br>
 
 ### ☎️ Contact
 

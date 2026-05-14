@@ -5,7 +5,7 @@ import { useRestaurantStore } from "@store";
 import { RestaurantType } from "@types";
 import { useRestaurantMutations } from "./useRestaurantMutations";
 import { searchFilter } from "@utils";
-import { useOperatingHoursMutations } from "./useOperatingHoursMutations ";
+import { useOperatingHoursMutations } from "./useOperatingHoursMutations";
 
 interface ApiErrorResponse {
   success: boolean;
@@ -27,7 +27,8 @@ export const useRestaurants = (id?: string) => {
       const { data } = await axios.get("/api/restaurants");
       return data.restaurants;
     },
-    staleTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 60, // 캐시 갱신
+    gcTime: 1000 * 60 * 60 * 24, // 캐시 삭제
   });
 
   const {

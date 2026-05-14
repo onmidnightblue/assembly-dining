@@ -7,13 +7,19 @@ type Props = {
   scale: number;
 };
 
+const C = {
+  RADIUS: 20,
+  MAX_ZOOM: 20,
+  SCALE_MULTIPLIER: 4.0,
+} as const;
+
 export const useMapCluster = ({ restaurants, scale }: Props) => {
   const clusterData = useMemo(() => {
     if (!restaurants) return null;
 
     const index = new Supercluster({
-      radius: 40,
-      maxZoom: 40,
+      radius: C.RADIUS,
+      maxZoom: C.MAX_ZOOM,
     });
 
     const filter = restaurants.filter((restaurant) => restaurant?.map_x);
@@ -34,7 +40,7 @@ export const useMapCluster = ({ restaurants, scale }: Props) => {
 
   const clusters = useMemo(() => {
     if (!clusterData) return [];
-    const zoom = Math.floor(scale * 1.5);
+    const zoom = Math.floor(scale * C.SCALE_MULTIPLIER);
     return clusterData.getClusters([0, 0, 100, 100], zoom);
   }, [clusterData, scale]);
 

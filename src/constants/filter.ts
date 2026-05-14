@@ -9,10 +9,10 @@ export const SORT_LABELS: Record<string, string> = {
   coord_desc: "좌표 ↓",
 };
 
-export const COORD_LABELS: Record<string, string> = {
-  all: "전체좌표",
-  with_coord: "좌표있음",
-  no_coord: "좌표없음",
+export const OPERATING_LABELS: Record<string, string> = {
+  all: "전체시간",
+  with_operating: "시간설정",
+  no_operating: "시간미설정",
 };
 
 export const STATUS_LABELS: Record<string, string> = {
@@ -22,17 +22,17 @@ export const STATUS_LABELS: Record<string, string> = {
 };
 
 export const VISIBLE_LABELS: Record<string, string> = {
-  true: "표시함",
-  false: "표시안함",
+  TRUE: "표시함",
+  FALSE: "표시안함",
   all: "전체표시",
 };
 
 export const STATUS_CYCLE = Object.keys(
   STATUS_LABELS
 ) as (keyof typeof STATUS_LABELS)[];
-export const COORD_CYCLE = Object.keys(
-  COORD_LABELS
-) as (keyof typeof COORD_LABELS)[];
+export const OPERATING_CYCLE = Object.keys(
+  OPERATING_LABELS
+) as (keyof typeof OPERATING_LABELS)[];
 export const VISIBLE_CYCLE = Object.keys(
   VISIBLE_LABELS
 ) as (keyof typeof VISIBLE_LABELS)[];

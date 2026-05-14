@@ -1,7 +1,7 @@
 import { SearchIcon } from "@assets";
 import {
-  COORD_LABELS,
-  COORD_CYCLE,
+  OPERATING_LABELS,
+  OPERATING_CYCLE,
   SORT_LABELS,
   SORT_CYCLE,
   STATUS_LABELS,
@@ -14,7 +14,7 @@ import { useRestaurantStore } from "@store";
 const Filter = ({}) => {
   const {
     sortOrder,
-    coordOrder,
+    operatingOrder,
     statusOrder,
     visibleOrder,
     setFilter,
@@ -32,7 +32,11 @@ const Filter = ({}) => {
       key: "visibleOrder",
       cycle: VISIBLE_CYCLE,
     },
-    { label: COORD_LABELS[coordOrder], key: "coordOrder", cycle: COORD_CYCLE },
+    {
+      label: OPERATING_LABELS[operatingOrder],
+      key: "operatingOrder",
+      cycle: OPERATING_CYCLE,
+    },
     { label: SORT_LABELS[sortOrder], key: "sortOrder", cycle: SORT_CYCLE },
   ] as const;
 

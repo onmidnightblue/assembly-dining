@@ -1,12 +1,12 @@
 import { create } from "zustand";
 import {
-  COORD_CYCLE,
+  OPERATING_CYCLE,
   SORT_CYCLE,
   STATUS_CYCLE,
   VISIBLE_CYCLE,
 } from "@constants";
 import {
-  CoordFilterType,
+  OperationgFilterType,
   RestaurantType,
   SortFilterType,
   StatusFilterType,
@@ -20,7 +20,7 @@ export interface RestaurantStoreState {
   selectedCategories: string[];
   searchTerm: string;
   sortOrder: SortFilterType;
-  coordOrder: CoordFilterType;
+  operatingOrder: OperationgFilterType;
   statusOrder: StatusFilterType;
   visibleOrder: VisibleFilterType;
   targetTimeFilter: TimeType | null;
@@ -51,7 +51,7 @@ export const useRestaurantStore = create<
   selectedCategories: [],
   searchTerm: "",
   sortOrder: SORT_CYCLE[0],
-  coordOrder: COORD_CYCLE[0],
+  operatingOrder: OPERATING_CYCLE[0],
   statusOrder: STATUS_CYCLE[0],
   visibleOrder: VISIBLE_CYCLE[0],
   targetTimeFilter: null,
@@ -91,7 +91,7 @@ export const useRestaurantStore = create<
       selectedCategories: [],
       searchTerm: "",
       sortOrder: SORT_CYCLE[0],
-      coordOrder: COORD_CYCLE[0],
+      operatingOrder: OPERATING_CYCLE[0],
       visibleCount: 20,
     }),
   toggleCategory: (category) =>

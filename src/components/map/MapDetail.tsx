@@ -1,6 +1,4 @@
-import ViewComponent from "@admin/restaurantListItem/ViewComponent";
-import { STATUS_LABELS } from "@constants";
-import { RestaurantListItemType, RestaurantType } from "@types";
+import { RestaurantType } from "@types";
 import { getOperatingHoursText } from "@utils";
 
 interface Props {
@@ -83,8 +81,8 @@ const MapDetail = ({ selectedRestaurant, onClose }: Props) => {
           >
             {phone || "전화번호"}
           </span>
-          <span className={getHighlightColor(has_room !== "true")}>
-            {has_room === "true" ? "룸보유" : "룸없음"}
+          <span className={getHighlightColor(has_room !== "TRUE")}>
+            {has_room === "TRUE" ? "룸보유" : "룸없음"}
           </span>
         </div>
         <div className={land_address ? "text-foreground" : "text-placeholder"}>
